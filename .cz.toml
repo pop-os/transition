@@ -3,6 +3,6 @@ name = "cz_conventional_commits"
 version = "v0.0.1"
 tag_format = "$version"
 version_files = [
-    "pop-transition/__version__.py"
+    "pop-transition/__version__.py:version"
 ]
 bump_message = "release $current_version → $new_version"
