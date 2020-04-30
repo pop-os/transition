@@ -107,7 +107,7 @@ class Release(Command):
                 subprocess.run(ch_command)
                 subprocess.run(['dch', '-r', '""'])
         
-        git_command.append(f'-m "chore(release): Deb release {version}"')
+        git_command.append(f'-m "chore(release): Release version {version}"')
         if not self.skip_git:
             print(git_command)
             if not self.dry_run:
