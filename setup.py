@@ -107,7 +107,7 @@ class Release(Command):
         print(f'Old Version: {get_version()}')
         print(f'New version: {version}')
 
-        ch_command.append(f'-v {version}')
+        ch_command.append(f'-v{version}')
         if not self.skip_deb:
             print(ch_command)
             if not self.dry_run:
