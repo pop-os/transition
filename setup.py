@@ -39,18 +39,14 @@ class Release(Command):
 
     user_options = [
         ('dry-run', None, 'Skip the actual release and do a dry run instead.'),
-        ('prerelease', None, 'Release this version as a pre-release.'),
         ('skip-deb', None, 'Skip doing a debian update for this release.'),
         ('skip-git', None, 'Skip committing to git at the end.'),
-        ('force-version=', None, 'Force the version to update to the given value.')
     ]
 
     def initialize_options(self):
         self.dry_run = False
-        self.prerelease = False
         self.skip_deb = False
         self.skip_git = False
-        self.force_version = None
     
     def finalize_options(self):
         if self.force_version:
