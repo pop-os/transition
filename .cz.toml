@@ -1,8 +1,7 @@
 [tool.commitizen]
 name = "cz_conventional_commits"
 version = "0.0.2a0"
-tag_format = "$version"
+tag_format = "v$version"
 version_files = [
-    "pop-transition/__version__.py:version"
+    "pop-transition/__version__.py"
 ]
-bump_message = "release $current_version → $new_version"

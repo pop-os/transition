@@ -31,7 +31,7 @@ def get_version():
     version = {}
     with open(os.path.join('pop-transition', '__version__.py')) as fp:
         exec(fp.read(), version)
-    return version['version']
+    return version['__version__']
 
 class Release(Command):
     """ Generate a release and push it to git."""
@@ -53,7 +53,9 @@ class Release(Command):
         self.increment = None
     
     def finalize_options(self):
-        pass
+        if self.prerelease:
+            print('Debian versions cannot be prereleases. Skipping Deb.')
+            self.skip_deb = True
 
     def run(self):
         cz_command = ['cz', 'bump', '--yes']
