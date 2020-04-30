@@ -99,7 +99,7 @@ class Release(Command):
         
         # We need to get the new version from CZ, as the file hasn't been 
         # updated yet.
-        version_command = cz_command
+        version_command = cz_command.copy()
         version_command.append('--dry-run')
         version_complete = subprocess.run(version_command, capture_output=True)
         
