@@ -31,7 +31,7 @@ def get_version():
     version = {}
     with open(os.path.join('pop-transition', '__version__.py')) as fp:
         exec(fp.read(), version)
-    return version['version']
+    return version['__version__']
 
 class Release(Command):
     """ Generate a release and push it to git."""
@@ -58,7 +58,7 @@ class Release(Command):
     def run(self):
         cz_command = ['cz', 'bump', '--yes']
         ch_command = ['dch']
-        git_command = ['git', 'commit', '-a']
+        git_command = ['git', 'add', '.']
 
         def capture_version(sp_complete):
             output = sp_complete.stdout.decode('UTF-8').split('\n')
@@ -114,7 +114,6 @@ class Release(Command):
                 subprocess.run(ch_command)
                 subprocess.run(['dch', '-r', '""'])
         
-        git_command.append(f'-m "chore(release): Release version {version}"')
         if not self.skip_git:
             print(git_command)
             if not self.dry_run:
