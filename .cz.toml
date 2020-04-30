@@ -1,6 +1,6 @@
 [tool.commitizen]
 name = "cz_conventional_commits"
-version = "v0.0.1"
+version = "0.0.2a0"
 tag_format = "$version"
 version_files = [
     "pop-transition/__version__.py:version"
