@@ -41,7 +41,7 @@ class Release(Command):
         ('dry-run', None, 'Skip the actual release and do a dry run instead.'),
         ('prerelease', None, 'Release this version as a pre-release.'),
         ('skip-deb', None, 'Skip doing a debian update for this release.'),
-        ('skip-git', None, 'Skip committing to git at the end.')
+        ('skip-git', None, 'Skip committing to git at the end.'),
         ('force-version=', None, 'Force the version to update to the given value.')
     ]
 
