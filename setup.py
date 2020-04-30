@@ -66,7 +66,14 @@ class Release(Command):
             for line in output:
                     if 'tag to create' in line:
                             version_line = line
-            return version_line.split()[-1]
+            
+            try:
+                return version_line.split()[-1].replace('v', '')
+            except UnboundLocalError:
+                stderr = sp_complete.stderr.decode('UTF-8')
+                print("WARNING: Couldn't get updated version! Using current.")
+                print(stderr)
+                return get_version()
 
         if self.dry_run:
             print('Dry run: Not making actual changes')
