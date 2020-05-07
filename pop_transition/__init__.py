@@ -20,3 +20,24 @@ THIS SOFTWARE.
 pop-transition is a simple app that notifies users if they have debian versions
 of packages which were transitioned to Flatpak in Pop_OS 20.04. 
 """
+
+import gettext
+import gi
+import sys
+
+gi.require_versions (
+    {
+        'Gdk': '3.0',
+        'Gio': '2.0',
+        'Gtk': '3.0',
+    }
+)
+
+from .application import Application
+
+gettext.bindtextdomain('pop-transition', '/usr/share/pop-transition/po')
+gettext.textdomain('pop-transition')
+
+def run():
+    app = Application()
+    app.run(sys.argv)
