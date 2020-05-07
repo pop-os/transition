@@ -123,6 +123,22 @@ class Release(Command):
         if not self.dry_run:
             subprocess.run(cz_command)
 
+class Test(Command):
+    """ Run the local copy of the application for testing."""
+    description = 'Run the local copy of the application for testing.'
+
+    user_options = []
+
+    def initialize_options(self):
+        pass
+    
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        import pop_transition
+        pop_transition.run()
+
 setup(
     name='pop-transition',
     version=get_version(),
@@ -136,6 +152,7 @@ setup(
     license='ISC',
     packages=['pop-transition'],
     cmdclass={
-        'release': Release
+        'release': Release,
+        'test': Test,
     }
 )
