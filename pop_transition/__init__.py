@@ -40,4 +40,4 @@ gettext.textdomain('pop-transition')
 
 def run():
     app = Application()
-    app.run(sys.argv)
+    app.run()

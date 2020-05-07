@@ -20,9 +20,13 @@ THIS SOFTWARE.
 pop-transition - Window Module
 """
 
+import gettext
+
 from gi.repository import Gtk
 
 from .headerbar import Headerbar
+
+_ = gettext.gettext
 
 class Window(Gtk.ApplicationWindow):
     """ Window for the pop-transition."""
@@ -34,5 +38,28 @@ class Window(Gtk.ApplicationWindow):
         
         self.headerbar = Headerbar(app)
         self.set_titlebar(self.headerbar)
+
+        content = Gtk.Box.new(Gtk.Orientation.VERTICAL, 6)
+        self.add(content)
+
+        description_label = Gtk.Label.new(
+            _(
+                'The following applications were recently transitioned to '
+                'Flatpak to provide the most upt-to-date software. The Debian '
+                'packages of these applications are no longer recieving updates. '
+                'Please install the Flatpak versions of these applications.'
+            )
+        )
+        content.add(description_label)
+
+        backup_label = Gtk.Label.new(
+            _(
+                'Please back up or export your application settings and '
+                'configuration that you want to preserve before you install the '
+                'Flatpak packages.'
+            )
+        )
+
+        content.add(backup_label)
 
         self.show_all()
