@@ -34,37 +34,37 @@ class Headerbar(Gtk.HeaderBar):
         self.set_title(_('Tranition to Flatpak'))
         
         # Left side
-        dismiss_button = Gtk.Button.new_with_label(_('Dismiss'))
+        self.dismiss_button = Gtk.Button.new_with_label(_('Dismiss'))
 
-        cancel_button = Gtk.Button.new_with_label(_('Cancel'))
+        self.cancel_button = Gtk.Button.new_with_label(_('Cancel'))
 
         self.left_button_stack = Gtk.Stack()
         self.pack_start(self.left_button_stack)
-        self.left_button_stack.add_named(dismiss_button, 'dismiss')
-        self.left_button_stack.add_named(cancel_button, 'cancel')
+        self.left_button_stack.add_named(self.dismiss_button, 'dismiss')
+        self.left_button_stack.add_named(self.cancel_button, 'cancel')
         
         self.left_button_stack.set_visible_child_name('dismiss')
         
         # Right side
-        install_button = Gtk.Button.new_with_label(_('Install'))
-        Gtk.StyleContext.add_class(install_button.get_style_context(),
+        self.install_button = Gtk.Button.new_with_label(_('Install'))
+        Gtk.StyleContext.add_class(self.install_button.get_style_context(),
                                    'suggested-action')
 
-        continue_button = Gtk.Button.new_with_label(_('Continue'))
-        Gtk.StyleContext.add_class(continue_button.get_style_context(),
+        self.continue_button = Gtk.Button.new_with_label(_('Continue'))
+        Gtk.StyleContext.add_class(self.continue_button.get_style_context(),
                                    'suggested-action')
         
-        remove_button = Gtk.Button.new_with_label(_('Remove'))
-        Gtk.StyleContext.add_class(remove_button.get_style_context(),
+        self.remove_button = Gtk.Button.new_with_label(_('Remove'))
+        Gtk.StyleContext.add_class(self.remove_button.get_style_context(),
                                    'destructive-action')
         
-        close_button = Gtk.Button.new_with_label(_('Close'))
+        self.close_button = Gtk.Button.new_with_label(_('Close'))
 
         self.right_button_stack = Gtk.Stack()
         self.pack_end(self.right_button_stack)
-        self.right_button_stack.add_named(install_button, 'install')
-        self.right_button_stack.add_named(continue_button, 'continue')
-        self.right_button_stack.add_named(close_button, 'close')
+        self.right_button_stack.add_named(self.install_button, 'install')
+        self.right_button_stack.add_named(self.continue_button, 'continue')
+        self.right_button_stack.add_named(self.close_button, 'close')
 
         self.right_button_stack.set_visible_child_name('install')
     

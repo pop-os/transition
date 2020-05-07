@@ -33,4 +33,17 @@ class Application(Gtk.Application):
     
     def do_activate(self):
         window = Window(app=self)
+        self.connect_signals(window)
         window.show()
+    
+    def connect_signals(self, window):
+        """ Connect signals to their functionality."""
+        for button in [window.headerbar.cancel_button,
+                       window.headerbar.dismiss_button,
+                       window.headerbar.close_button]:
+            button.connect('clicked', self.on_quit_clicked)
+        
+
+    def on_quit_clicked(self, button, data=None):
+        """ Clicked signal handler for the various 'quit' buttons."""
+        self.quit()

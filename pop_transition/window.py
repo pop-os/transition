@@ -35,21 +35,27 @@ class Window(Gtk.ApplicationWindow):
         super().__init__(application=app)
         
         self.set_default_size(400, 500)
+        self.set_resizable(False)
         
         self.headerbar = Headerbar(app)
         self.set_titlebar(self.headerbar)
 
-        content = Gtk.Box.new(Gtk.Orientation.VERTICAL, 6)
+        content = Gtk.Box.new(Gtk.Orientation.VERTICAL, 12)
+        content.props.margin = 24
         self.add(content)
 
         description_label = Gtk.Label.new(
             _(
                 'The following applications were recently transitioned to '
-                'Flatpak to provide the most upt-to-date software. The Debian '
+                'Flatpak to provide the most up-to-date software. The Debian '
                 'packages of these applications are no longer recieving updates. '
                 'Please install the Flatpak versions of these applications.'
             )
         )
+        description_label.set_line_wrap(True)
+        description_label.set_halign(Gtk.Align.START)
+        description_label.set_max_width_chars(54)
+        description_label.set_xalign(0)
         content.add(description_label)
 
         backup_label = Gtk.Label.new(
@@ -59,7 +65,10 @@ class Window(Gtk.ApplicationWindow):
                 'Flatpak packages.'
             )
         )
-
+        backup_label.set_line_wrap(True)
+        backup_label.set_halign(Gtk.Align.START)
+        backup_label.set_max_width_chars(54)
+        backup_label.set_xalign(0)
         content.add(backup_label)
 
         self.show_all()
