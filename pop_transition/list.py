@@ -35,6 +35,7 @@ class List(Gtk.Box):
         self.add(self.select_all_check)
         
         scrolled = Gtk.ScrolledWindow()
+        scrolled.set_vexpand(True)
         self.add(scrolled)
 
         self.listbox = Gtk.ListBox()

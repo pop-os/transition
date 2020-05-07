@@ -72,7 +72,7 @@ class Window(Gtk.ApplicationWindow):
         backup_label.set_xalign(0)
         content.add(backup_label)
 
-        app_list = List()
-        content.add(app_list)
+        self.app_list = List()
+        content.add(self.app_list)
 
         self.show_all()

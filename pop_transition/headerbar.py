@@ -32,7 +32,7 @@ class Headerbar(Gtk.HeaderBar):
         self.app = app
         super().__init__()
 
-        self.set_title(_('Tranition to Flatpak'))
+        self.set_title(_('Transition to Flatpak'))
         
         # Left side
         self.dismiss_button = Gtk.Button.new_with_label(_('Dismiss'))
