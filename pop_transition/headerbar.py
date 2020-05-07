@@ -19,6 +19,7 @@ THIS SOFTWARE.
 
 pop-transition - Headerbar Module
 """
+
 import gettext
 from gi.repository import Gtk
 

@@ -25,6 +25,7 @@ import gettext
 from gi.repository import Gtk
 
 from .headerbar import Headerbar
+from .list import List
 
 _ = gettext.gettext
 
@@ -70,5 +71,8 @@ class Window(Gtk.ApplicationWindow):
         backup_label.set_max_width_chars(54)
         backup_label.set_xalign(0)
         content.add(backup_label)
+
+        app_list = List()
+        content.add(app_list)
 
         self.show_all()
