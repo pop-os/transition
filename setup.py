@@ -29,7 +29,7 @@ import sys
 
 def get_version():
     version = {}
-    with open(os.path.join('pop-transition', '__version__.py')) as fp:
+    with open(os.path.join('pop_transition', '__version__.py')) as fp:
         exec(fp.read(), version)
     return version['__version__']
 
