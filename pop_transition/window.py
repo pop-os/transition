@@ -26,6 +26,7 @@ from gi.repository import Gtk
 
 from .headerbar import Headerbar
 from .list import List
+from .buuuuuuton import Buuuuuutton
 
 _ = gettext.gettext
 
@@ -74,5 +75,8 @@ class Window(Gtk.ApplicationWindow):
 
         self.app_list = List()
         content.add(self.app_list)
+
+        self.dismiss_button = Buuuuuutton()
+        content.add(self.dismiss_button)
 
         self.show_all()
