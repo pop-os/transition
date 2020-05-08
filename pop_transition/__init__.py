@@ -28,6 +28,7 @@ import sys
 gi.require_versions (
     {
         'Gdk': '3.0',
+        'GdkPixbuf': '2.0',
         'Gio': '2.0',
         'Gtk': '3.0',
     }
@@ -39,14 +40,6 @@ gettext.bindtextdomain('pop-transition', '/usr/share/pop-transition/po')
 gettext.textdomain('pop-transition')
 
 APPS = {
-    'app': {
-        'name': 'App',
-        'version': 'version',
-        'icon': 'icon',
-        'id': 'id',
-        'old_id': None,
-        'deb_pkg': 'deb'
-    },
     'android_studio': {
         'name': 'Android Studio',
         'version': '3.6.3.0',
@@ -58,7 +51,7 @@ APPS = {
     'dbeaver': {
         'name': 'DBeaver',
         'version': '7.0.4',
-        'icon': 'icon',
+        'icon': '/usr/share/dbeaver/dbeaver.png',
         'id': 'io.dbeaver.DBeaverCommunity',
         'old_id': None,
         'deb_pkg': 'dbeaver-ce'
@@ -66,7 +59,7 @@ APPS = {
     'discord': {
         'name': 'Discord',
         'version': '0.0.10',
-        'icon': 'icon',
+        'icon': 'discord',
         'id': 'com.discordapp.Discord',
         'old_id': None,
         'deb_pkg': 'discord'
@@ -74,7 +67,7 @@ APPS = {
     'gitkraken': {
         'name': 'GitKracken',
         'version': '6.6.0',
-        'icon': 'icon',
+        'icon': 'gitkraken',
         'id': 'com.axosoft.GitKraken',
         'old_id': None,
         'deb_pkg': 'gitkraken'
@@ -122,7 +115,7 @@ APPS = {
     'spotify': {
         'name': 'Spotify',
         'version': '1.1.26.501',
-        'icon': 'icon',
+        'icon': 'spotify-client',
         'id': 'com.spotify.Client',
         'old_id': None,
         'deb_pkg': 'spotify-client'
@@ -138,5 +131,5 @@ APPS = {
 }
 
 def run():
-    app = Application()
+    app = Application(APPS)
     app.run()
