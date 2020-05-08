@@ -22,7 +22,7 @@ pop-transition - Packages displayed within the list.
 
 import gettext
 
-from gi.repository import Gtk
+from gi.repository import Gtk, GdkPixbuf
 
 _ = gettext.gettext
 
@@ -32,10 +32,7 @@ class Package(Gtk.Grid):
     This lets us perform actions more easily.
     """
 
-    def __init__(self, name=None, version=None, app_id=None, old_app_id=None, deb=None):
-        self.app_id = app_id
-        self.old_app_id = old_app_id
-        self.deb_package = deb
+    def __init__(self):
         
         super().__init__()
 
@@ -48,8 +45,8 @@ class Package(Gtk.Grid):
         self.attach(self.checkbox, 0, 0, 1, 2)
 
         # FIXME: Get actual icon
-        icon = Gtk.Image.new_from_icon_name('distributor-logo-pop', Gtk.IconSize.DIALOG)
-        self.attach(icon, 1, 0, 1, 2)
+        self.icon_image = Gtk.Image.new_from_icon_name('distributor-logo', Gtk.IconSize.DND)
+        self.attach(self.icon_image, 1, 0, 1, 2)
 
         self.name_label = Gtk.Label()
         self.name_label.set_valign(Gtk.Align.END)
@@ -79,10 +76,7 @@ class Package(Gtk.Grid):
         self.spinner.set_halign(Gtk.Align.END)
         self.spinner.set_hexpand(True)
         self.attach(self.spinner, 5, 0, 1, 2)
-        self.spinner.start()
 
-        self.name = name
-        self.version = version
         self.source = 'Flathub'
 
     @property
@@ -102,6 +96,18 @@ class Package(Gtk.Grid):
     @version.setter
     def version(self, version):
         self.version_label.set_text(version)
+    
+    @property
+    def icon(self):
+        return self.icon_image.get_icon_name()
+    
+    @icon.setter
+    def icon(self, icon):
+        if not icon.startswith('/'):
+            self.icon_image.set_from_icon_name(icon, Gtk.IconSize.DND)
+        else:
+            pxbf = GdkPixbuf.Pixbuf.new_from_file_at_size(icon, 32, 32)
+            self.icon_image.set_from_pixbuf(pxbf)
     
     @property
     def source(self):
