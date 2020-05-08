@@ -38,6 +38,105 @@ from .application import Application
 gettext.bindtextdomain('pop-transition', '/usr/share/pop-transition/po')
 gettext.textdomain('pop-transition')
 
+APPS = {
+    'app': {
+        'name': 'App',
+        'version': 'version',
+        'icon': 'icon',
+        'id': 'id',
+        'old_id': None,
+        'deb_pkg': 'deb'
+    },
+    'android_studio': {
+        'name': 'Android Studio',
+        'version': '3.6.3.0',
+        'icon': 'androidstudio',
+        'id': 'com.google.AndroidStudio',
+        'old_id': None,
+        'deb_pkg': 'android-studio'
+    },
+    'dbeaver': {
+        'name': 'DBeaver',
+        'version': '7.0.4',
+        'icon': 'icon',
+        'id': 'io.dbeaver.DBeaverCommunity',
+        'old_id': None,
+        'deb_pkg': 'dbeaver-ce'
+    },
+    'discord': {
+        'name': 'Discord',
+        'version': '0.0.10',
+        'icon': 'icon',
+        'id': 'com.discordapp.Discord',
+        'old_id': None,
+        'deb_pkg': 'discord'
+    },
+    'gitkraken': {
+        'name': 'GitKracken',
+        'version': '6.6.0',
+        'icon': 'icon',
+        'id': 'com.axosoft.GitKraken',
+        'old_id': None,
+        'deb_pkg': 'gitkraken'
+    },
+    'keepassxc': {
+        'name': 'KeePassXC',
+        'version': '2.5.4',
+        'icon': 'keepassxc',
+        'id': 'org.keepassxc.KeePassXC',
+        'old_id': None,
+        'deb_pkg': 'keepassxc'
+    },
+    'lollypop': {
+        'name': 'Lollypop',
+        'version': '1.2.35',
+        'icon': 'org.gnome.Lollypop',
+        'id': 'org.gnome.Lollypop',
+        'old_id': None,
+        'deb_pkg': 'lollypop'
+    },
+    'mattermost': {
+        'name': 'Mattermost',
+        'version': '4.4.1',
+        'icon': 'mattermost-desktop',
+        'id': 'com.mattermost.Desktop',
+        'old_id': None,
+        'deb_pkg': 'mattermost-desktop'
+    },
+    'peek': {
+        'name': 'Peek',
+        'version': '1.5.1',
+        'icon': 'com.uploadedlobster.peek',
+        'id': 'com.uploadedlobster.peek',
+        'old_id': None,
+        'deb_pkg': 'peek'
+    },
+    'signal': {
+        'name': 'Signal',
+        'version': '1.33.4',
+        'icon': 'signal-desktop',
+        'id': 'org.signal.signal',
+        'old_id': None,
+        'deb_pkg': 'signal-desktop'
+    },
+    'spotify': {
+        'name': 'Spotify',
+        'version': '1.1.26.501',
+        'icon': 'icon',
+        'id': 'com.spotify.Client',
+        'old_id': None,
+        'deb_pkg': 'spotify-client'
+    },
+    'wire': {
+        'name': 'Wire',
+        'version': '3.17.2924',
+        'icon': 'wire-desktop',
+        'id': 'com.wire.WireDesktop',
+        'old_id': None,
+        'deb_pkg': 'wire-desktop'
+    },
+}
+
 def run():
     app = Application()
     app.run()
