@@ -3,7 +3,7 @@ pop-transition (0.1.0) eoan; urgency=medium
   * Release 0.1.0
   * Adds a basic UI for the dialog
 
- -- Ian Santopietro <ian@system76.com>  Fri, 08 May 2020 15:52:31 -0600
+ -- Ian Santopietro <ian@system76.com>  Fri, 08 May 2020 15:53:32 -0600
 
 pop-transition (0.0.2) eoan; urgency=medium
 
