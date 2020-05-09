@@ -30,5 +30,5 @@ class Buuuuuutton(Gtk.Button):
     def __init__(self):
         super().__init__()
 
-        self.set_label(_('Dismiss all notifications.'))
+        self.set_label(_('Dismiss all notifications'))
     
