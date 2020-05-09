@@ -39,6 +39,7 @@ class List(Gtk.Box):
         self.add(scrolled)
 
         self.listbox = Gtk.ListBox()
+        self.listbox.set_selection_mode(Gtk.SelectionMode.NONE)
         scrolled.add(self.listbox)
     
     def add_package(self, package):
