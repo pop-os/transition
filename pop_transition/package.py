@@ -44,8 +44,7 @@ class Package(Gtk.Grid):
         self.checkbox = Gtk.CheckButton()
         self.attach(self.checkbox, 0, 0, 1, 2)
 
-        # FIXME: Get actual icon
-        self.icon_image = Gtk.Image.new_from_icon_name('distributor-logo', Gtk.IconSize.DND)
+        self.icon_image = Gtk.Image()
         self.attach(self.icon_image, 1, 0, 1, 2)
 
         self.name_label = Gtk.Label()
