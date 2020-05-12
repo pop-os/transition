@@ -54,23 +54,26 @@ class Package(Gtk.Grid):
         self.name_label.set_xalign(0)
         self.attach(self.name_label, 2, 0, 3, 1)
 
-        self.version_label = Gtk.Label()
-        Gtk.StyleContext.add_class(self.version_label.get_style_context(), 'dim-label')
-        self.version_label.set_valign(Gtk.Align.START)
-        self.version_label.set_yalign(0)
-        self.attach(self.version_label, 2, 1, 1, 1)
-
-        dash = Gtk.Label.new('-')
-        Gtk.StyleContext.add_class(dash.get_style_context(), 'dim-label')
-        dash.set_valign(Gtk.Align.START)
-        dash.set_yalign(0)
-        self.attach(dash, 3, 1, 1, 1)
-
         self.source_label = Gtk.Label()
         Gtk.StyleContext.add_class(self.source_label.get_style_context(), 'dim-label')
+        self.source_label.set_halign(Gtk.Align.START)
         self.source_label.set_valign(Gtk.Align.START)
         self.source_label.set_yalign(0)
-        self.attach(self.source_label, 4, 1, 1, 1)
+        self.attach(self.source_label, 2, 1, 1, 1)
+
+        # FIXME: This won't work because AppStream segfaults when getting 
+        # Components. Consider re-adding later.
+        # dash = Gtk.Label.new('-')
+        # Gtk.StyleContext.add_class(dash.get_style_context(), 'dim-label')
+        # dash.set_valign(Gtk.Align.START)
+        # dash.set_yalign(0)
+        # self.attach(dash, 3, 1, 1, 1)
+        #
+        # self.version_label = Gtk.Label()
+        # Gtk.StyleContext.add_class(self.version_label.get_style_context(), 'dim-label')
+        # self.version_label.set_valign(Gtk.Align.START)
+        # self.version_label.set_yalign(0)
+        # self.attach(self.version_label, 2, 1, 1, 1)
 
         self.spinner = Gtk.Spinner()
         self.spinner.set_halign(Gtk.Align.END)
@@ -88,14 +91,14 @@ class Package(Gtk.Grid):
     def name(self, name):
         self.name_label.set_text(name)
     
-    @property
-    def version(self):
-        """ str: The version of the app."""
-        return self.version_label.get_text()
+    # @property
+    # def version(self):
+    #     """ str: The version of the app."""
+    #     return self.version_label.get_text()
     
-    @version.setter
-    def version(self, version):
-        self.version_label.set_text(version)
+    # @version.setter
+    # def version(self, version):
+        # self.version_label.set_text(version)
     
     @property
     def icon(self):
