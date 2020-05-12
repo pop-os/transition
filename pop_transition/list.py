@@ -41,6 +41,8 @@ class List(Gtk.Box):
         self.listbox = Gtk.ListBox()
         self.listbox.set_selection_mode(Gtk.SelectionMode.NONE)
         scrolled.add(self.listbox)
+
+        self.packages = []
     
     def add_package(self, package):
         """ Adds an application object to the list.
@@ -49,3 +51,5 @@ class List(Gtk.Box):
             package (package): The package to add.
         """
         self.listbox.add(package)
+        self.packages.append(package)
+    
