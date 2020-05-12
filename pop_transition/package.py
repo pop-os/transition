@@ -74,10 +74,18 @@ class Package(Gtk.Grid):
         # self.version_label.set_yalign(0)
         # self.attach(self.version_label, 2, 1, 1, 1)
 
+        self.status_label = Gtk.Label()
+        self.status_label.set_halign(Gtk.Align.END)
+        self.status_label.set_hexpand(True)
+        self.status_label.set_xalign(1)
+        Gtk.StyleContext.add_class(self.status_label.get_style_context(), 
+                                   'dim-label')
+        self.attach(self.status_label, 5, 0, 1, 2)
+
         self.spinner = Gtk.Spinner()
         self.spinner.set_halign(Gtk.Align.END)
         self.spinner.set_hexpand(True)
-        self.attach(self.spinner, 5, 0, 1, 2)
+        self.attach(self.spinner, 6, 0, 1, 2)
 
         self.source = 'Flathub'
 
@@ -153,3 +161,20 @@ class Package(Gtk.Grid):
     def deb_package(self, deb):
         self._deb_name = deb
     
+    @property
+    def status(self):
+        return self.status_label.get_text()
+    
+    @status.setter
+    def status(self, status):
+        self.status_label.set_text(status)
+    
+    @property
+    def busy(self):
+        busy = not self.checkbox.get_sensitive()
+        return busy
+    
+    @busy.setter
+    def busy(self, busy):
+        sensitive = not busy
+        self.checkbox.set_sensitive(sensitive)

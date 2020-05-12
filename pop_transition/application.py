@@ -46,6 +46,16 @@ class Application(Gtk.Application):
                        window.headerbar.close_button,
                        window.dismiss_button]:
             button.connect('clicked', self.on_quit_clicked)
+        
+        window.headerbar.install_button.connect(
+            'clicked', self.on_install_clicked, window
+        )
+    
+    def on_install_clicked(self, button, window, data=None):
+        print('Install clicked')
+        window.app_list.select_all_check.set_sensitive(False)
+        for package in window.app_list.packages:
+            package.busy = True
     
     def add_testing_data(self, window):
         """ Populate the GUI with test data to test the UI layout."""
