@@ -27,6 +27,7 @@ import sys
 
 gi.require_versions (
     {
+        'Flatpak': '1.0',
         'Gdk': '3.0',
         'GdkPixbuf': '2.0',
         'Gio': '2.0',

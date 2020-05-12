@@ -84,10 +84,17 @@ class Package(Gtk.Grid):
 
         self.spinner = Gtk.Spinner()
         self.spinner.set_halign(Gtk.Align.END)
-        self.spinner.set_hexpand(True)
         self.attach(self.spinner, 6, 0, 1, 2)
 
         self.source = 'Flathub'
+
+    def stop_spinner(self):
+        """ Unsets this package as busy"""
+        self.spinner.stop()
+    
+    def set_status_text(self, text):
+        """ Sets the status text."""
+        self.status = text
 
     @property
     def name(self):
