@@ -22,8 +22,9 @@ pop-transition - Main Application
 
 from gi.repository import Gtk, Gio
 
-from .window import Window
+from . import flatpak
 from .package import Package
+from .window import Window
 
 class Application(Gtk.Application):
     """ Application class"""
@@ -56,6 +57,16 @@ class Application(Gtk.Application):
         window.app_list.select_all_check.set_sensitive(False)
         for package in window.app_list.packages:
             package.busy = True
+        
+        for package in window.app_list.packages:
+            package.spinner.start()
+            package.status = 'Checking'
+            if package.checkbox.get_active():
+                package.status = 'Installing'
+                flatpak.install_flatpak(package)
+            else:
+                package.spinner.stop()
+                package.status = ''
     
     def add_testing_data(self, window):
         """ Populate the GUI with test data to test the UI layout."""
