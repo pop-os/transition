@@ -21,6 +21,6 @@ pop-transition is a simple app that notifies users if they have debian versions
 of packages which were transitioned to Flatpak in Pop_OS 20.04. 
 """
 
-import pop-transition
+import pop_transition
 
-pop-transition.run()
+pop_transition.run()
