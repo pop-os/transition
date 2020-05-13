@@ -48,10 +48,11 @@ class Window(Gtk.ApplicationWindow):
 
         description_label = Gtk.Label.new(
             _(
-                'The following applications were recently transitioned to '
-                'Flatpak to provide the most up-to-date software. The Debian '
-                'packages of these applications are no longer recieving updates. '
-                'Please install the Flatpak versions of these applications.'
+                'Please reinstall the following applications to ensure your '
+                'software stays up-to-date. First, install the Flatpak versions '
+                'of these applications, as the Debian packages will no longer '
+                'receive updates. Then you will be able to remove the Debian '
+                'packages.'
             )
         )
         description_label.set_line_wrap(True)
@@ -62,9 +63,9 @@ class Window(Gtk.ApplicationWindow):
 
         backup_label = Gtk.Label.new(
             _(
-                'Please back up or export your application settings and '
-                'configuration that you want to preserve before you install the '
-                'Flatpak packages.'
+                'To ensure the smoothest transition, back up or '
+                'export your application data and configurations before '
+                'installing the Flatpak packages.'
             )
         )
         backup_label.set_line_wrap(True)
