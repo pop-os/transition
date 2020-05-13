@@ -32,7 +32,7 @@ class Application(Gtk.Application):
 
     def __init__(self, app_list):
         self.app_list = app_list
-        super().__init__(application_id='org.pop-os.transition',
+        super().__init__(application_id='org.pop_os.transition',
                          flags=Gio.ApplicationFlags.FLAGS_NONE)
         self.cache = Cache()
     

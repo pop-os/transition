@@ -94,6 +94,11 @@ class Transition(dbus.service.Object):
             # For testing
             return
         
+        if self.dbus_info is None:
+            self.dbus_info = dbus.Interface(conn.get_object('org.freedesktop.DBus',
+                '/org/freedesktop/DBus/Bus', False), 'org.freedesktop.DBus')
+        pid = self.dbus_info.GetConnectionUnixProcessID(sender)
+        
         if self.polkit is None:
             self.polkit = dbus.Interface(dbus.SystemBus().get_object(
                 'org.freedesktop.PolicyKit1',
