@@ -31,7 +31,7 @@ from apt.cache import Cache
 from gi.repository import GLib, GObject
 
 class TransitionException(dbus.DBusException):
-    _dbus_error_name = 'org.pop-os.transition.TransitionException'
+    _dbus_error_name = 'org.pop_os.transition.TransitionException'
 
 class PermissionDeniedByPolicy(dbus.DBusException):
     _dbus_error_name = 'org.pop_os.transition.PermissionDeniedByPolicy'
@@ -46,13 +46,13 @@ class Transition(dbus.service.Object):
         self.cache = Cache()
 
     @dbus.service.method(
-        'org.pop-os.transition.Interface', 
+        'org.pop_os.transition.Interface', 
         in_signature='as', out_signature='b',
         sender_keyword='sender', connection_keyword='conn'
     )
     def remove_packages(self, pkg_list, sender=None, conn=None):
         self._check_polkit_privilege(
-            sender, conn, 'org.pop-os.transition.removedebs'
+            sender, conn, 'org.pop_os.transition.removedebs'
         )
 
         self.cache.update()
@@ -68,7 +68,7 @@ class Transition(dbus.service.Object):
         return True
     
     @dbus.service.method(
-        'org.pop-os.transition.Interface', 
+        'org.pop_os.transition.Interface', 
         in_signature='', out_signature='',
         sender_keyword='sender', connection_keyword='conn'
     )
@@ -123,7 +123,7 @@ if __name__ == "__main__":
     dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
 
     bus = dbus.SystemBus()
-    name = dbus.service.BusName('org.pop-os.transition', bus)
+    name = dbus.service.BusName('org.pop_os.transition', bus)
     object = Transition(bus, '/PopTransition')
     mainloop = GObject.MainLoop()
 
