@@ -32,6 +32,7 @@ class List(Gtk.Box):
     def __init__(self):
         super().__init__(orientation=Gtk.Orientation.VERTICAL, spacing=6)
         self.select_all_check = Gtk.CheckButton.new_with_label(_('Select all'))
+        self.select_all_check.connect('toggled', self.on_select_all_toggled)
         self.add(self.select_all_check)
         
         scrolled = Gtk.ScrolledWindow()
@@ -43,6 +44,11 @@ class List(Gtk.Box):
         scrolled.add(self.listbox)
 
         self.packages = []
+    
+    def on_select_all_toggled(self, button, data=None):
+        state = self.select_all_check.get_active()
+        for i in self.packages:
+            i.checkbox.set_active(state)
     
     def add_package(self, package):
         """ Adds an application object to the list.
