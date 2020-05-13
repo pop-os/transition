@@ -150,7 +150,7 @@ setup(
     author='Ian Santopietro',
     author_email='ian@system76.com',
     license='ISC',
-    packages=['pop-transition'],
+    packages=['pop_transition'],
     cmdclass={
         'release': Release,
         'test': Test,
