@@ -17,6 +17,7 @@ Vcs-Git: https://github.com/pop-os/pop-transition.git
 Package: pop-transition
 Architecture: all
 Depends: ${python3:Depends}, ${misc:Depends},
+         repoman,
          python3-gi,
          libflatpak-dev,
          gir1.2-gtk-3.0,
@@ -28,13 +29,3 @@ Description: Pop!_OS Deb-to-Flatpak Migration Assistant
  .
  This package installs the application for Python 3.
 
-Package: pop-transition-doc
-Architecture: all
-Section: doc
-Depends: ${sphinxdoc:Depends}, ${misc:Depends}
-Description: Pop!_OS Deb-to-Flatpak Migration Assistant (common documentation)
- Checks the current installation for installed debian pakcages which have been 
- dropped from the Pop!_OS repository, and suggests installing Flatpak versions
- of those packages instead. 
- .
- This is the common documentation package.
