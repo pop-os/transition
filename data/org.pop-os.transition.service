@@ -1,0 +1,4 @@
+[D-BUS Service]
+Name=org.pop-os.transition
+Exec=/usr/bin/python3 /usr/lib/pop-transition/service.py
+User=root
