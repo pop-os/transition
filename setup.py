@@ -154,5 +154,11 @@ setup(
     cmdclass={
         'release': Release,
         'test': Test,
-    }
+    },
+    data_files=[
+        ('/usr/share/dbus-1/system-services', ['data/org.pop_os.transition.service']),
+        ('/usr/share/polkit-1/actions', ['data/org.pop_os.transition.policy']),
+        ('/etc/dbus-1/system.d/', ['data/org.pop_os.transition.conf']),
+        ('/usr/lib/pop-transition', ['data/service.py'])
+    ]
 )
