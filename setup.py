@@ -18,7 +18,7 @@ TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
 THIS SOFTWARE.
 
 pop-transition is a simple app that notifies users if they have debian versions
-of packages which were transitioned to Flatpak in Pop_OS 20.04. 
+of packages which were transitioned to Flatpak in pop-os 20.04. 
 """
 
 from distutils.core import setup
@@ -156,9 +156,9 @@ setup(
         'test': Test,
     },
     data_files=[
-        ('/usr/share/dbus-1/system-services', ['data/org.pop_os.transition.service']),
-        ('/usr/share/polkit-1/actions', ['data/org.pop_os.transition.policy']),
-        ('/etc/dbus-1/system.d/', ['data/org.pop_os.transition.conf']),
+        ('/usr/share/dbus-1/system-services', ['data/org.pop-os.transition.service']),
+        ('/usr/share/polkit-1/actions', ['data/org.pop-os.transition.policy']),
+        ('/etc/dbus-1/system.d/', ['data/org.pop-os.transition.conf']),
         ('/usr/lib/pop-transition', ['data/service.py'])
     ]
 )
