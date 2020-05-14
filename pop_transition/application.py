@@ -54,19 +54,20 @@ class Application(Gtk.Application):
     
     def on_install_clicked(self, button, window, data=None):
         print('Install clicked')
-        window.app_list.select_all_check.set_sensitive(False)
-        for package in window.app_list.packages:
-            package.busy = True
+        window.set_buttons_sensitive(False)
+        install_flatpaks = []
         
         for package in window.app_list.packages:
             package.spinner.start()
             package.status = 'Checking'
             if package.checkbox.get_active():
                 package.status = 'Installing'
-                flatpak.install_flatpak(package, window)
+                install_flatpaks.append(package)
             else:
                 package.spinner.stop()
                 package.status = ''
+        flatpak.install_flatpaks(install_flatpaks, window)
+        
     
     def add_installed_packages(self, window):
         """ Populate the GUI with test data to test the UI layout."""

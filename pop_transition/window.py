@@ -46,7 +46,7 @@ class Window(Gtk.ApplicationWindow):
         content.props.margin = 24
         self.add(content)
 
-        description_label = Gtk.Label.new(
+        self.description_label = Gtk.Label.new(
             _(
                 'Please reinstall the following applications to ensure your '
                 'software stays up-to-date. First, install the Flatpak versions '
@@ -55,24 +55,24 @@ class Window(Gtk.ApplicationWindow):
                 'packages.'
             )
         )
-        description_label.set_line_wrap(True)
-        description_label.set_halign(Gtk.Align.START)
-        description_label.set_max_width_chars(54)
-        description_label.set_xalign(0)
-        content.add(description_label)
+        self.description_label.set_line_wrap(True)
+        self.description_label.set_halign(Gtk.Align.START)
+        self.description_label.set_max_width_chars(54)
+        self.description_label.set_xalign(0)
+        content.add(self.description_label)
 
-        backup_label = Gtk.Label.new(
+        self.backup_label = Gtk.Label.new(
             _(
                 'To ensure the smoothest transition, back up or '
                 'export your application data and configurations before '
                 'installing the Flatpak packages.'
             )
         )
-        backup_label.set_line_wrap(True)
-        backup_label.set_halign(Gtk.Align.START)
-        backup_label.set_max_width_chars(54)
-        backup_label.set_xalign(0)
-        content.add(backup_label)
+        self.backup_label.set_line_wrap(True)
+        self.backup_label.set_halign(Gtk.Align.START)
+        self.backup_label.set_max_width_chars(54)
+        self.backup_label.set_xalign(0)
+        content.add(self.backup_label)
 
         self.app_list = List()
         content.add(self.app_list)
@@ -81,3 +81,41 @@ class Window(Gtk.ApplicationWindow):
         content.add(self.dismiss_button)
 
         self.show_all()
+    
+    def set_buttons_sensitive(self, sensitive):
+        """ Sets the buttons in the GUI to be either sensitive or insensitive.
+
+        Arguments:
+            sensitive (bool): Whether or not the buttons should be sensitive.
+        """
+        self.dismiss_button.set_sensitive(sensitive)
+        self.headerbar.left_button_stack.set_sensitive(sensitive)
+        self.headerbar.right_button_stack.set_sensitive(sensitive)
+        self.app_list.select_all_check.set_sensitive(sensitive)
+        for app in self.app_list.packages:
+            app.checkbox.set_sensitive(sensitive)
+        
+    
+    def show_apt_remove(self):
+        """ Change the GUI into Apt removal mode."""
+        self.backup_label.hide()
+        self.description_label.set_text(
+            _(
+                'The following Debian packages can be removed. Please note that '
+                'removing the packages will uninstall them from all user '
+                'accounts. Other users will have to manually reinstall the '
+                'applications from Pop Shop.'
+            )
+        )
+        self.headerbar.set_right_button('remove')
+        self.headerbar.set_left_button('cancel')
+        self.set_buttons_sensitive(True)
+        self.app_list.select_all_check.set_sensitive(True)
+        self.app_list.select_all_check.set_active(False)
+
+        for app in self.app_list.packages:
+            if 'Installed' in app.status_label.get_text():
+                app.checkbox.set_active(True)
+
+            else:
+                app.checkbox.set_active(False)

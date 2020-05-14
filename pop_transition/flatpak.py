@@ -47,36 +47,40 @@ def get_user_installation():
     """
     return flatpak_helper.get_installation_for_type('user')
 
-def install_flatpak(package, window):
+def install_flatpaks(packages, window):
     """ Install a package from Flathub in user mode.
 
     Arguments:
-        id (str): The ID of the app to install.
-        package (Package): the package widget.
+        packages ([Package]): the package widgets to install.
     """
-    install_thread = InstallThread(package, window)
+    install_thread = InstallThread(packages, window)
     install_thread.start()
 
 class InstallThread(Thread):
 
-    def __init__(self, package, window):
+    def __init__(self, packages, window):
         super().__init__()
-        self.package = package
+        self.packages = packages
         self.window = window
         self.user = get_user_installation()
         self.flathub = get_flathub_remote()
     
     def run(self):
-        try:
-            self.user.install(
-                self.flathub.get_name(),
-                RefKind.APP,
-                self.package.app_id,
-                None,
-                'stable'
-            )
-            idle_add(self.package.stop_spinner)
-            idle_add(self.package.set_status_text, 'Installed')
-        except:
-            idle_add(self.package.stop_spinner)
-            idle_add(self.package.set_status_text, 'Already Installed')
+        print('Installing Flatpaks...')
+        for package in self.packages:
+            print(f'Installing {package.name} flatpak {package.app_id}.')
+            try:
+                self.user.install(
+                    self.flathub.get_name(),
+                    RefKind.APP,
+                    package.app_id,
+                    None,
+                    'stable'
+                )
+                idle_add(package.stop_spinner)
+                idle_add(package.set_status_text, 'Flatpak Installed')
+            except:
+                idle_add(package.stop_spinner)
+                idle_add(package.set_status_text, 'Already Installed')
+        
+        idle_add(self.window.show_apt_remove)
