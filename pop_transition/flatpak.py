@@ -47,23 +47,22 @@ def get_user_installation():
     """
     return flatpak_helper.get_installation_for_type('user')
 
-def install_flatpak(package):
+def install_flatpak(package, window):
     """ Install a package from Flathub in user mode.
 
     Arguments:
         id (str): The ID of the app to install.
         package (Package): the package widget.
     """
-    user = get_user_installation()
-    flathub = get_flathub_remote()
-    install_thread = InstallThread(package)
+    install_thread = InstallThread(package, window)
     install_thread.start()
 
 class InstallThread(Thread):
 
-    def __init__(self, package):
+    def __init__(self, package, window):
         super().__init__()
         self.package = package
+        self.window = window
         self.user = get_user_installation()
         self.flathub = get_flathub_remote()
     

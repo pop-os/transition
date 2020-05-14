@@ -22,8 +22,9 @@ pop-transition - Packages displayed within the list.
 
 import gettext
 
-from apt.cache import Cache
 from gi.repository import Gtk, GdkPixbuf
+
+from . import apt
 
 _ = gettext.gettext
 
@@ -33,10 +34,10 @@ class Package(Gtk.Grid):
     This lets us perform actions more easily.
     """
 
-    def __init__(self, cache=None):
+    def __init__(self):
         
         super().__init__()
-        self.cache = cache
+        self.cache = apt.get_cache()
 
         self.props.margin = 6
         self.set_column_spacing(12)
@@ -102,7 +103,7 @@ class Package(Gtk.Grid):
     def installed(self):
         """ bool: whether the deb-package is installed."""
         if self.cache is None:
-            self.cache = Cache()
+            self.cache = apt.get_cache()
         pkg = self.cache[self.deb_package]
         return pkg.is_installed
 

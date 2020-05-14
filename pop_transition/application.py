@@ -20,7 +20,6 @@ THIS SOFTWARE.
 pop-transition - Main Application
 """
 
-from apt.cache import Cache
 from gi.repository import Gtk, Gio
 
 from . import flatpak
@@ -34,7 +33,6 @@ class Application(Gtk.Application):
         self.app_list = app_list
         super().__init__(application_id='org.pop_os.transition',
                          flags=Gio.ApplicationFlags.FLAGS_NONE)
-        self.cache = Cache()
     
     def do_activate(self):
         window = Window(app=self)
@@ -65,7 +63,7 @@ class Application(Gtk.Application):
             package.status = 'Checking'
             if package.checkbox.get_active():
                 package.status = 'Installing'
-                flatpak.install_flatpak(package)
+                flatpak.install_flatpak(package, window)
             else:
                 package.spinner.stop()
                 package.status = ''
@@ -73,7 +71,7 @@ class Application(Gtk.Application):
     def add_installed_packages(self, window):
         """ Populate the GUI with test data to test the UI layout."""
         for app in self.app_list:
-            pkg = Package(cache=self.cache)
+            pkg = Package()
             pkg.name = self.app_list[app]['name']
             pkg.version = self.app_list[app]['version']
             pkg.icon = self.app_list[app]['icon']
