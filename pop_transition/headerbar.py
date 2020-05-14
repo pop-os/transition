@@ -65,6 +65,7 @@ class Headerbar(Gtk.HeaderBar):
         self.pack_end(self.right_button_stack)
         self.right_button_stack.add_named(self.install_button, 'install')
         self.right_button_stack.add_named(self.continue_button, 'continue')
+        self.right_button_stack.add_named(self.remove_button, 'remove')
         self.right_button_stack.add_named(self.close_button, 'close')
 
         self.right_button_stack.set_visible_child_name('install')
@@ -97,7 +98,7 @@ class Headerbar(Gtk.HeaderBar):
         Returns:
             The Gtk.Button that was set
         """
-        if name in ['dismiss', 'cancel']:
+        if name in ['install', 'continue', 'remove', 'cancel']:
             self.right_button_stack.set_visible_child_name(name)
             button = self.right_button_stack.get_visible_child()
             return button
@@ -105,5 +106,5 @@ class Headerbar(Gtk.HeaderBar):
             raise Exception(
                 f'{name} is not a valid child of window.headerbar.'
                 'right_button_stack. Please choose from "install", "continue", '
-                'or "close".'
+                '"remove", or "close".'
             )
