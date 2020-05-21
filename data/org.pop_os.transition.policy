@@ -8,7 +8,7 @@
   <vendor_url>https://github.com/pop-os/transition</vendor_url>
   <icon_name>x-system-software-sources</icon_name>
 
-  <action id="org.pop_os.transition.removedebs">
+  <action id="org.pop_os.transition_system.removedebs">
     <description>Removes installed Debian packages.</description>
     <message>
         Authentication is required to remove installed Debian packages.
