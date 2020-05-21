@@ -33,13 +33,17 @@ _ = gettext.gettext
 class Window(Gtk.ApplicationWindow):
     """ Window for the pop-transition."""
 
-    def __init__(self, app=None):
+    @staticmethod
+    def new(application):
+        return Gtk.ApplicationWindow.new(application)
+    
+    def __init__(self,app):
         super().__init__(application=app)
         
         self.set_default_size(400, 500)
         self.set_resizable(False)
         
-        self.headerbar = Headerbar(app)
+        self.headerbar = Headerbar()
         self.set_titlebar(self.headerbar)
 
         content = Gtk.Box.new(Gtk.Orientation.VERTICAL, 12)

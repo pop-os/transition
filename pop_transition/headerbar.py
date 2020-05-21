@@ -28,8 +28,7 @@ _ = gettext.gettext
 class Headerbar(Gtk.HeaderBar):
     """Pop transition header bar."""
 
-    def __init__(self, app):
-        self.app = app
+    def __init__(self):
         super().__init__()
 
         self.set_title(_('Transition to Flatpak'))
