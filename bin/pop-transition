@@ -22,5 +22,9 @@ of packages which were transitioned to Flatpak in Pop_OS 20.04.
 """
 
 import pop_transition
+import sys
 
-pop_transition.run()
+if len(sys.argv) > 1:
+    pop_transition.run_window()
+else:
+    pop_transition.run()

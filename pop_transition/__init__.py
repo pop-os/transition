@@ -35,7 +35,7 @@ gi.require_versions (
     }
 )
 
-from .application import Application
+from .application import Notification, Application
 
 gettext.bindtextdomain('pop-transition', '/usr/share/pop-transition/po')
 gettext.textdomain('pop-transition')
@@ -132,5 +132,9 @@ APPS = {
 }
 
 def run():
+    app = Notification(APPS)
+    app.run()
+
+def run_window():
     app = Application(APPS)
     app.run()
