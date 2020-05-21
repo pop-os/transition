@@ -20,11 +20,15 @@ THIS SOFTWARE.
 pop-transition - Main Application
 """
 
+import gettext
+
 from gi.repository import Gtk, Gio
 
 from . import flatpak
 from .package import Package
 from .window import Window
+
+_ = gettext.gettext
 
 class Application(Gtk.Application):
     """ Application class"""
@@ -34,11 +38,34 @@ class Application(Gtk.Application):
         super().__init__(application_id='org.pop_os.transition',
                          flags=Gio.ApplicationFlags.FLAGS_NONE)
     
+    def do_startup(self):
+        showwin_action = Gio.SimpleAction.new('show-window', None)
+        showwin_action.connect('activate', self.show_window)
+        self.add_action(showwin_action)
+    
     def do_activate(self):
+        self.show_notification()
+    
+    def show_notification(self):
+        notification = Gio.Notification.new(_('Transition to Flatpak'))
+        notification.set_body(
+            _(
+                'A number of debian packages are no longer recieving updates. '
+                'Please transition these applications to Flatpak to continue '
+                'receiving updates.'
+            )
+        )
+        icon = Gio.ThemedIcon.new('system-software-sources')
+        notification.set_icon(icon)
+        notification.set_default_action('app.show_window')
+        self.send_notification('transition-available', notification)
+    
+    def show_window(self):
         window = Window(app=self)
         self.connect_signals(window)
-        self.add_installed_packages(window)
-        window.show()
+        for package in self.get_installed_packages():
+                window.app_list.add_package(package)
+        window.show_all()
     
     def connect_signals(self, window):
         """ Connect signals to their functionality."""
@@ -69,8 +96,8 @@ class Application(Gtk.Application):
         flatpak.install_flatpaks(install_flatpaks, window)
         
     
-    def add_installed_packages(self, window):
-        """ Populate the GUI with test data to test the UI layout."""
+    def get_installed_packages(self):
+        """ Yield a list of installed Packages."""
         for app in self.app_list:
             pkg = Package()
             pkg.name = self.app_list[app]['name']
@@ -80,9 +107,7 @@ class Application(Gtk.Application):
             pkg.app_id = self.app_list[app]['id']
             pkg.deb_package = self.app_list[app]['deb_pkg']
             if pkg.installed:
-                window.app_list.add_package(pkg)
-
-        window.show_all()
+                yield pkg
 
     def on_quit_clicked(self, button, data=None):
         """ Clicked signal handler for the various 'quit' buttons."""

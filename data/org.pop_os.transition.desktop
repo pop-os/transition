@@ -1,0 +1,13 @@
+[Desktop Entry]
+Name=Transition to Flatpak
+GenericName=Transition to Flatpak
+Comment=Transition applications to Flatpak
+Categories=System;
+Exec=/usr/bin/pop-transition
+Icon=system-software-sources
+Terminal=false
+Type=Application
+X-GNOME-Gettext-Domain=pop-transition
+Keywords=Python;
+NoDisplay=true
+DBusActivatable=true
