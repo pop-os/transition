@@ -37,8 +37,10 @@ class Window(Gtk.ApplicationWindow):
     def new(application):
         return Gtk.ApplicationWindow.new(application)
     
-    def __init__(self,app):
+    def __init__(self, app):
         super().__init__(application=app)
+
+        self.app = app
         
         self.set_default_size(400, 500)
         self.set_resizable(False)
@@ -99,6 +101,8 @@ class Window(Gtk.ApplicationWindow):
         for app in self.app_list.packages:
             app.checkbox.set_sensitive(sensitive)
         
+    def quit_app(self):
+        self.app.quit()
     
     def show_apt_remove(self):
         """ Change the GUI into Apt removal mode."""

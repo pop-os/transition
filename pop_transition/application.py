@@ -25,6 +25,7 @@ import gettext
 from gi.repository import Gtk, Gio
 
 from . import flatpak
+from . import apt
 from .package import Package
 from .window import Window
 
@@ -91,6 +92,28 @@ class Notification(Gtk.Application):
         window.headerbar.install_button.connect(
             'clicked', self.on_install_clicked, window
         )
+        window.headerbar.remove_button.connect(
+            'clicked', self.on_remove_clicked, window
+        )
+    
+    def on_remove_clicked(self, button, window, data=None):
+        print('Remove Clicked')
+        window.set_buttons_sensitive(False)
+        remove_debs = []
+
+        for package in window.app_list.packages:
+            package.spinner.start()
+            package.status = f'Checking'
+
+            if package.checkbox.get_active():
+                package.status = f'Removing deb {package.deb_package}'
+                remove_debs.append(package.deb_package)
+            else:
+                package.spinner.stop()
+                package.status()
+        
+        apt.remove_debs(remove_debs, window)
+
     
     def on_install_clicked(self, button, window, data=None):
         print('Install clicked')
