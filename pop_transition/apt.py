@@ -20,10 +20,15 @@ THIS SOFTWARE.
 pop-transition - APT interface module.
 """
 
+import dbus
+
 from apt.cache import Cache
+from gi.repository.GObject import idle_add
 from threading import Thread
 
 CACHE = Cache()
+bus = dbus.SystemBus()
+privileged_object = bus.get_object('org.pop_os.transition_system', '/PopTransition')
 
 def get_cache():
     """ Returns the currently-open apt.cache.Cache object."""
@@ -45,3 +50,24 @@ def update_cache():
     global CACHE
     CACHE = Cache()
     return CACHE
+
+def remove_debs(remove_debs, window):
+    remove_thread = RemoveThread(remove_debs, window)
+    remove_thread.start()
+
+class RemoveThread(Thread):
+    def __init__(self, packages, window):
+        super().__init__()
+        self.window = window
+        self.packages = packages
+    
+    def run(self):
+        try:
+            print(f'Removing debs: {self.packages}')
+            success = privileged_object.remove_packages(self.packages)
+        
+        except:
+            print("Countn't remove one or more packages")
+        
+        idle_add(self.window.quit_app)
+
