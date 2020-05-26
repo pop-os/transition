@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Flatpak Transition
+Icon=system-software-update
+Comment=Check for deprecated Debian packages, and display notification if found
+Categories=System
+Exec=/usr/bin/pop-transition -d
