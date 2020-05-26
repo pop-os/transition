@@ -55,7 +55,6 @@ class Application(Gtk.Application):
     def connect_signals(self, window):
         """ Connect signals to their functionality."""
         for button in [window.headerbar.cancel_button,
-                       window.headerbar.dismiss_button,
                        window.headerbar.close_button]:
             button.connect('clicked', self.on_quit_clicked)
         
