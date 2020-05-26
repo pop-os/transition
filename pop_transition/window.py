@@ -43,7 +43,7 @@ class Window(Gtk.ApplicationWindow):
 
         self.app = app
         
-        self.set_default_size(400, 500)
+        self.set_default_size(500, 500)
         self.set_resizable(False)
         
         self.headerbar = Headerbar()
