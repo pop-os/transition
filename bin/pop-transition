@@ -21,6 +21,29 @@ pop-transition is a simple app that notifies users if they have debian versions
 of packages which were transitioned to Flatpak in Pop_OS 20.04. 
 """
 
+help = """pop-transition - Migrate deprecated Debian packages to Flatpak.
+
+Usage:
+    pop-transition [daemon | check | help ]
+
+    If run without options, pop-transition will open the transition helper 
+    window.
+
+Options:
+    help, -h
+            Display this help message and exit.
+
+    check, -c
+            Check for deprecated debian packages and print any that are 
+            currently installed. 
+
+    daemon, -d
+            Run as a daemon without displaying a window. If there are apps to 
+            transition, a notification will be displayed. The daemon will then 
+            exit after 10 seconds.
+"""
+    
+
 import pop_transition
 import sys
 
@@ -33,6 +56,9 @@ elif 'daemon' in sys.argv[-1] or sys.argv[-1] == '-d':
 elif 'check' in sys.argv[-1] or sys.argv[-1] == '-c':
     output, output_text = pop_transition.run_check()
     print(output_text)
+
+elif 'help' in sys.argv[-1] or sys.argv[-1] == '-h':
+    print(help)
 
 else:
     pop_transition.run_window()
