@@ -43,7 +43,7 @@ class Headerbar(Gtk.HeaderBar):
         self.left_button_stack.add_named(self.dismiss_button, 'dismiss')
         self.left_button_stack.add_named(self.cancel_button, 'cancel')
         
-        self.left_button_stack.set_visible_child_name('dismiss')
+        self.left_button_stack.set_visible_child_name('cancel')
         
         # Right side
         self.install_button = Gtk.Button.new_with_label(_('Install'))
