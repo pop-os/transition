@@ -1,3 +1,9 @@
+pop-transition (0.5.0) eoan; urgency=medium
+
+  * Add ability to dismiss notifications to the window.
+
+ -- Ian Santopietro <ian@system76.com>  Tue, 26 May 2020 17:16:22 -0600
+
 pop-transition (0.4.0) eoan; urgency=medium
 
   * Adds a basic CLI interface to lauch the program or display a list of deprecated 
