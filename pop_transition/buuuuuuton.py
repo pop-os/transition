@@ -27,8 +27,17 @@ from gi.repository import Gtk
 _ = gettext.gettext
 
 class Buuuuuutton(Gtk.Button):
+
+    dismiss_label = _('Dismiss all notifications')
+    show_label = _('Show notifications')
+
     def __init__(self):
         super().__init__()
 
-        self.set_label(_('Dismiss all notifications'))
+        self.set_dismiss()
+
+    def set_show(self):
+        self.set_label(self.show_label)
     
+    def set_dismiss(self):
+        self.set_label(self.dismiss_label)

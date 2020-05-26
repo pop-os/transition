@@ -24,6 +24,7 @@ import gettext
 
 from gi.repository import Gtk
 
+from . import dismissal
 from .headerbar import Headerbar
 from .list import List
 from .buuuuuuton import Buuuuuutton
@@ -85,6 +86,10 @@ class Window(Gtk.ApplicationWindow):
 
         self.dismiss_button = Buuuuuutton()
         content.add(self.dismiss_button)
+        
+        # Change thje text is case the notifications are already hidden
+        if dismissal.is_dismissed():
+            self.dismiss_button.set_show()
 
         self.show_all()
     

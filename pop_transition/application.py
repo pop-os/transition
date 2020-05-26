@@ -24,8 +24,9 @@ import gettext
 
 from gi.repository import Gtk, Gio
 
-from . import flatpak
 from . import apt
+from . import dismissal
+from . import flatpak
 from .package import Package
 from .window import Window
 
@@ -55,8 +56,7 @@ class Application(Gtk.Application):
         """ Connect signals to their functionality."""
         for button in [window.headerbar.cancel_button,
                        window.headerbar.dismiss_button,
-                       window.headerbar.close_button,
-                       window.dismiss_button]:
+                       window.headerbar.close_button]:
             button.connect('clicked', self.on_quit_clicked)
         
         window.headerbar.install_button.connect(
@@ -65,6 +65,20 @@ class Application(Gtk.Application):
         window.headerbar.remove_button.connect(
             'clicked', self.on_remove_clicked, window
         )
+
+        window.dismiss_button.connect(
+            'clicked', self.on_dmismiss_clicked, window
+        )
+    
+    def on_dmismiss_clicked(self, button, window, data=None):
+        if not dismissal.is_dismissed():
+            dismissal.dismiss_notifications()
+            self.quit()
+        
+        else:
+            dismissal.show_notifications()
+            window.dismiss_button.set_dismiss()
+
     
     def on_remove_clicked(self, button, window, data=None):
         print('Remove Clicked')
@@ -129,7 +143,11 @@ class Notification(Application):
         showwin_action = Gio.SimpleAction.new('show-window', None)
         showwin_action.connect('activate', self.show_window)
         self.add_action(showwin_action)
-        self.show_notification()
+        
+        # Don't show a notification if the user has dismissed them.
+        if not dismissal.is_dismissed():
+            self.show_notification()
+
         Gtk.Application.do_startup(self)
     
     def do_activate(self):

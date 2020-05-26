@@ -72,9 +72,16 @@ def dismiss_notifications():
     Places a file a standardized location which will tell the application not to
     display notifications in the future.
     """
-    transition_path = get_transition_path()
-    dismiss_file = transition_path / 'dismiss-notifications'
+    dismiss_file = get_transition_path() / 'dismiss-notifications'
     dismiss_file.touch()
+
+def show_notifications():
+    """ Continue showing notifications.
+
+    This undoes the actions of dismiss_notifications().
+    """
+    dismiss_file = get_transition_path() / 'dismiss-notifications'
+    dismiss_file.unlink(missing_ok=True)
 
 def is_dismissed():
     """ Figures out if notifications have been dismissed before.
