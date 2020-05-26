@@ -1,3 +1,9 @@
+pop-transition (0.3.0) eoan; urgency=medium
+
+  * The final page now removes selected Deb packages
+
+ -- Ian Santopietro <ian@system76.com>  Tue, 26 May 2020 13:42:10 -0600
+
 pop-transition (0.2.1) eoan; urgency=medium
 
   * The Dbus Service now sets a valid bus name
