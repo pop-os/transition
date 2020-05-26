@@ -42,7 +42,7 @@ class Application(Gtk.Application):
     def do_activate(self):
         self.show_window()
     
-    def show_window(self):
+    def show_window(self, action=None, data=None):
         print('showing window')
         self.withdraw_notification('transition-ready')
         self.window = Window(self)
@@ -157,4 +157,3 @@ class Notification(Application):
             self.send_notification('transition-ready', notification)
         else:
             self.quit()
-            
