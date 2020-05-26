@@ -22,7 +22,7 @@ pop-transition - Packages displayed within the list.
 
 import gettext
 
-from gi.repository import Gtk, GdkPixbuf
+from gi.repository import Gtk, GdkPixbuf, GLib
 
 from . import apt
 
@@ -134,8 +134,11 @@ class Package(Gtk.Grid):
         if not icon.startswith('/'):
             self.icon_image.set_from_icon_name(icon, Gtk.IconSize.DND)
         else:
-            pxbf = GdkPixbuf.Pixbuf.new_from_file_at_size(icon, 32, 32)
-            self.icon_image.set_from_pixbuf(pxbf)
+            try:
+                pxbf = GdkPixbuf.Pixbuf.new_from_file_at_size(icon, 32, 32)
+                self.icon_image.set_from_pixbuf(pxbf)
+            except GLib.Error:
+                self.icon_image.set_from_icon_name('image-missing', Gtk.IconSize.DND)
     
     @property
     def source(self):

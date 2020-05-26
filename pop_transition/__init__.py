@@ -138,3 +138,24 @@ def run():
 def run_window():
     app = Application(APPS)
     app.run()
+
+def run_check():
+    app = Application(APPS)
+    installed_pkgs = []
+    
+    for package in app.get_installed_packages():
+        installed_pkgs.append(package)
+    
+    output_text = 'No installed Debian packages are depcrecated by Pop!_OS.'
+    output = False
+    if installed_pkgs:
+        output = True
+        output_text = (
+            'The following Debian packages have been deprecated by Pop!_OS. '
+            'Please install the corresponding Flatpaks and remove the deprecated '
+            'Debian packages:\n'
+        )
+        for package in installed_pkgs:
+            output_text += f'    {package.name}: {package.deb_package} is now {package.app_id}\n'
+    
+    return (output, output_text)

@@ -24,7 +24,15 @@ of packages which were transitioned to Flatpak in Pop_OS 20.04.
 import pop_transition
 import sys
 
-if len(sys.argv) > 1:
+if len(sys.argv) < 1:
     pop_transition.run_window()
-else:
+
+elif 'daemon' in sys.argv[-1] or sys.argv[-1] == '-d':
     pop_transition.run()
+
+elif 'check' in sys.argv[-1] or sys.argv[-1] == '-c':
+    output, output_text = pop_transition.run_check()
+    print(output_text)
+
+else:
+    pop_transition.run_window()
