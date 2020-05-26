@@ -1,6 +1,6 @@
 [Desktop Entry]
-Name=Transition to Flatpak
-GenericName=Transition to Flatpak
+Name=Flatpak Transition
+GenericName=Flatpak Transition
 Comment=Transition applications to Flatpak
 Categories=System;
 Exec=/usr/bin/pop-transition
