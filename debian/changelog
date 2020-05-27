@@ -1,3 +1,9 @@
+pop-transition (0.6.2) eoan; urgency=medium
+
+  * Set the correct Apt repo name for the Removal page.
+
+ -- Ian Santopietro <ian@system76.com>  Wed, 27 May 2020 15:54:01 -0600
+
 pop-transition (0.6.1) eoan; urgency=medium
 
   * Fix AppID for Signal
