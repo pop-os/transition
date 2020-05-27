@@ -1,3 +1,9 @@
+pop-transition (0.6.4) eoan; urgency=medium
+
+  * Hide Transition App from App Lists
+
+ -- Ian Santopietro <ian@system76.com>  Wed, 27 May 2020 16:15:05 -0600
+
 pop-transition (0.6.3) eoan; urgency=medium
 
   * Ensure Description label spans the width of the window.
