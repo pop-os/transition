@@ -112,7 +112,7 @@ class Application(Gtk.Application):
                 install_flatpaks.append(package)
             else:
                 package.spinner.stop()
-                package.status = 'Installed'
+                package.status = ''
         flatpak.install_flatpaks(install_flatpaks, window)
     
     def get_installed_packages(self):
