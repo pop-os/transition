@@ -30,6 +30,10 @@ CACHE = Cache()
 bus = dbus.SystemBus()
 privileged_object = bus.get_object('org.pop_os.transition_system', '/PopTransition')
 
+def get_privileged_object():
+    global privileged_object
+    return privileged_object
+
 def get_cache():
     """ Returns the currently-open apt.cache.Cache object."""
     global CACHE
@@ -66,7 +70,7 @@ class RemoveThread(Thread):
         for package in self.packages:
             pkg_list.append(package.deb_package)
         try:
-            print(f'Removing debs: {self.packages}')
+            print(f'Removing debs: {pkg_list}')
             success = privileged_object.remove_packages(pkg_list)
         
         except:
@@ -75,7 +79,7 @@ class RemoveThread(Thread):
         # idle_add(self.window.quit_app)
         for package in self.packages:
             if package.deb_package in success:
-                idle_add(package.set_removed)
+                idle_add(package.set_removed, True)
         
         idle_add(self.window.show_summary)
 

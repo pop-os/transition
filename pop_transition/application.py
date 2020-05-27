@@ -72,6 +72,8 @@ class Application(Gtk.Application):
     def on_dmismiss_clicked(self, button, window, data=None):
         if not dismissal.is_dismissed():
             dismissal.dismiss_notifications()
+            po = apt.get_privileged_object()
+            po.exit()
             self.quit()
         
         else:
@@ -93,7 +95,7 @@ class Application(Gtk.Application):
                 remove_debs.append(package)
             else:
                 package.spinner.stop()
-                package.status = 'Removed'
+                package.status = ''
         
         apt.remove_debs(remove_debs, window)
     
@@ -128,6 +130,8 @@ class Application(Gtk.Application):
 
     def on_quit_clicked(self, button, data=None):
         """ Clicked signal handler for the various 'quit' buttons."""
+        po = apt.get_privileged_object()
+        po.exit()
         self.quit()
 
 class Notification(Application):

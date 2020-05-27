@@ -94,7 +94,7 @@ class Headerbar(Gtk.HeaderBar):
         Returns:
             The Gtk.Button that was set
         """
-        if name in ['install', 'continue', 'remove', 'cancel']:
+        if name in ['install', 'continue', 'remove', 'close']:
             self.right_button_stack.set_visible_child_name(name)
             button = self.right_button_stack.get_visible_child()
             return button
