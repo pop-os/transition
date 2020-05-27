@@ -9,5 +9,5 @@ Terminal=false
 Type=Application
 X-GNOME-Gettext-Domain=pop-transition
 Keywords=Python;
-# NoDisplay=true
+NoDisplay=true
 DBusActivatable=true
