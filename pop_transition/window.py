@@ -69,7 +69,7 @@ class Window(Gtk.ApplicationWindow):
         )
         self.description_label.set_line_wrap(True)
         self.description_label.set_halign(Gtk.Align.START)
-        self.description_label.set_max_width_chars(54)
+        self.description_label.set_max_width_chars(66)
         self.description_label.set_xalign(0)
         first_page.add(self.description_label)
 
@@ -82,7 +82,7 @@ class Window(Gtk.ApplicationWindow):
         )
         self.backup_label.set_line_wrap(True)
         self.backup_label.set_halign(Gtk.Align.START)
-        self.backup_label.set_max_width_chars(54)
+        self.backup_label.set_max_width_chars(66)
         self.backup_label.set_xalign(0)
         first_page.add(self.backup_label)
 
