@@ -178,3 +178,6 @@ class Window(Gtk.ApplicationWindow):
         self.headerbar.set_left_button('cancel')
         self.set_buttons_sensitive(True)
         self.app_list.select_all_check.set_sensitive(True)
+
+        for package in self.app_list.packages:
+            package.source = "Pop!_OS Repo"
