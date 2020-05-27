@@ -37,6 +37,7 @@ class Package(Gtk.Grid):
     def __init__(self):
         
         super().__init__()
+        self.removed = False
         self.cache = apt.get_cache()
 
         self.props.margin = 6
@@ -98,6 +99,21 @@ class Package(Gtk.Grid):
     def set_status_text(self, text):
         """ Sets the status text."""
         self.status = text
+    
+    def set_installed_status(self, status):
+        self.installed_status = status
+    
+    def set_removed(self, removed):
+        self.removed = removed
+    
+    @property
+    def installed_status(self):
+        """ str: The installation status of the flatpak package. """
+        return self._installed_status
+    
+    @installed_status.setter
+    def installed_status(self, status):
+        self._installed_status = status
 
     @property
     def installed(self):

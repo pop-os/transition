@@ -79,8 +79,10 @@ class InstallThread(Thread):
                 )
                 idle_add(package.stop_spinner)
                 idle_add(package.set_status_text, 'Flatpak Installed')
+                idle_add(package.set_installed_status, 'Installed')
             except:
                 idle_add(package.stop_spinner)
                 idle_add(package.set_status_text, 'Already Installed')
+                idle_add(package.set_installed_status, 'Already Installed')
         
         idle_add(self.window.show_apt_remove)

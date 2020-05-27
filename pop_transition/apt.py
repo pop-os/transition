@@ -62,12 +62,20 @@ class RemoveThread(Thread):
         self.packages = packages
     
     def run(self):
+        pkg_list = []
+        for package in self.packages:
+            pkg_list.append(package.deb_package)
         try:
             print(f'Removing debs: {self.packages}')
-            success = privileged_object.remove_packages(self.packages)
+            success = privileged_object.remove_packages(pkg_list)
         
         except:
             print("Countn't remove one or more packages")
         
-        idle_add(self.window.quit_app)
+        # idle_add(self.window.quit_app)
+        for package in self.packages:
+            if package.deb_package in success:
+                idle_add(package.set_removed)
+        
+        idle_add(self.window.show_summary)
 
