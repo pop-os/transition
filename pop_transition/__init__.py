@@ -109,7 +109,7 @@ APPS = {
         'name': 'Signal',
         'version': '1.33.4',
         'icon': 'signal-desktop',
-        'id': 'org.signal.signal',
+        'id': 'org.signal.Signal',
         'old_id': None,
         'deb_pkg': 'signal-desktop'
     },
