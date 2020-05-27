@@ -90,7 +90,7 @@ class Application(Gtk.Application):
 
             if package.checkbox.get_active():
                 package.status = f'Removing deb {package.deb_package}'
-                remove_debs.append(package.deb_package)
+                remove_debs.append(package)
             else:
                 package.spinner.stop()
                 package.status = 'Removed'

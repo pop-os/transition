@@ -47,7 +47,7 @@ class Transition(dbus.service.Object):
 
     @dbus.service.method(
         'org.pop_os.transition_system.Interface', 
-        in_signature='as', out_signature='b',
+        in_signature='as', out_signature='as',
         sender_keyword='sender', connection_keyword='conn'
     )
     def remove_packages(self, pkg_list, sender=None, conn=None):
@@ -57,15 +57,20 @@ class Transition(dbus.service.Object):
 
         self.cache.update()
         self.cache.open()
+        removed_pkgs = []
 
         for package in pkg_list:
-            pkg = self.cache[package]
-            pkg.mark_delete()
-        
+            try:
+                pkg = self.cache[package]
+                pkg.mark_delete()
+                removed_pkgs.append(package)
+            except:
+                print(f'Could not mark {package} for removal')
+
         self.cache.commit()
         self.cache.close()
 
-        return True
+        return removed_pkgs
     
     @dbus.service.method(
         'org.pop_os.transition_system.Interface', 
