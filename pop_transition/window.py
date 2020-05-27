@@ -148,7 +148,7 @@ class Window(Gtk.ApplicationWindow):
                 summary_text += f'    {package.name}'
                 summary_text += ' Already Installed\n'
         
-        summary_text += _('\nThe following Debain packages were removed:\n')
+        summary_text += _('\nThe following Debian packages were removed:\n')
         for package in self.app_list.packages:
             if package.removed:
                 # Translators: Do not translate this string
