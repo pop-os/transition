@@ -109,7 +109,10 @@ class Package(Gtk.Grid):
     @property
     def installed_status(self):
         """ str: The installation status of the flatpak package. """
-        return self._installed_status
+        try:
+            return self._installed_status
+        except AttributeError:
+            return 'Not Installed'
     
     @installed_status.setter
     def installed_status(self, status):

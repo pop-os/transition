@@ -43,15 +43,20 @@ class Window(Gtk.ApplicationWindow):
 
         self.app = app
         
-        self.set_default_size(500, 500)
+        self.set_default_size(500, 550)
         self.set_resizable(False)
         
         self.headerbar = Headerbar()
         self.set_titlebar(self.headerbar)
 
-        content = Gtk.Box.new(Gtk.Orientation.VERTICAL, 12)
-        content.props.margin = 24
-        self.add(content)
+        self.content = Gtk.Stack()
+        self.content.set_transition_type(Gtk.StackTransitionType.OVER_LEFT)
+        self.content.set_transition_duration(250)
+        self.content.props.margin = 24
+        self.add(self.content)
+
+        first_page = Gtk.Box.new(Gtk.Orientation.VERTICAL, 12)
+        self.content.add_named(first_page, 'first_page')
 
         self.description_label = Gtk.Label.new(
             _(
@@ -66,7 +71,7 @@ class Window(Gtk.ApplicationWindow):
         self.description_label.set_halign(Gtk.Align.START)
         self.description_label.set_max_width_chars(54)
         self.description_label.set_xalign(0)
-        content.add(self.description_label)
+        first_page.add(self.description_label)
 
         self.backup_label = Gtk.Label.new(
             _(
@@ -79,18 +84,37 @@ class Window(Gtk.ApplicationWindow):
         self.backup_label.set_halign(Gtk.Align.START)
         self.backup_label.set_max_width_chars(54)
         self.backup_label.set_xalign(0)
-        content.add(self.backup_label)
+        first_page.add(self.backup_label)
 
         self.app_list = List()
-        content.add(self.app_list)
+        first_page.add(self.app_list)
 
         self.dismiss_button = Buuuuuutton()
-        content.add(self.dismiss_button)
+        first_page.add(self.dismiss_button)
         
+        # Summary page
+        summary_page = Gtk.Box.new(Gtk.Orientation.VERTICAL, 12)
+        self.content.add_named(summary_page, 'summary')
+
+        summary_label = Gtk.Label.new(
+            _(
+                'The following actions have been performed:'
+            )
+        )
+        summary_page.add(summary_label)
+
+        summary_scroll = Gtk.ScrolledWindow()
+        summary_scroll.set_vexpand(True)
+        summary_page.add(summary_scroll)
+
+        self.summary_view = Gtk.TextView()
+        summary_scroll.add(self.summary_view)
+
         # Change thje text is case the notifications are already hidden
         if dismissal.is_dismissed():
             self.dismiss_button.set_show()
 
+        self.content.set_visible_child_name('first_page')
         self.show_all()
     
     def set_buttons_sensitive(self, sensitive):
@@ -103,11 +127,38 @@ class Window(Gtk.ApplicationWindow):
         self.headerbar.left_button_stack.set_sensitive(sensitive)
         self.headerbar.right_button_stack.set_sensitive(sensitive)
         self.app_list.select_all_check.set_sensitive(sensitive)
-        for app in self.app_list.packages:
-            app.checkbox.set_sensitive(sensitive)
         
     def quit_app(self):
         self.app.quit()
+    
+    def set_summary_text(self):
+        buffer = self.summary_view.get_buffer()
+        summary_text = _('The following Flatpaks were installed:\n')
+
+        for package in self.app_list.packages:
+            if package.installed_status == 'Installed':
+                # Translators: Do not translate this string
+                summary_text += f'    {package.name} ({package.app_id})\n'
+            
+            if package.installed_status == 'Already Installed':
+                # Translators: Do not translate this string
+                summary_text += f'    {package.name}'
+                summary_text += ' Already Installed\n'
+        
+        summary_text += _('\nThe following Debain packages were removed:\n')
+        for package in self.app_list.packages:
+            if package.removed:
+                # Translators: Do not translate this string
+                summary_text += f'    {package.name} ({package.deb_package})\n'
+        
+        buffer.set_text(summary_text)
+    
+    def show_summary(self):
+        self.content.set_visible_child_name('summary')
+        self.headerbar.left_button_stack.hide()
+        self.headerbar.set_right_button('close')
+        self.set_summary_text()
+        self.set_buttons_sensitive(True)
     
     def show_apt_remove(self):
         """ Change the GUI into Apt removal mode."""
