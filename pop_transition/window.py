@@ -51,7 +51,7 @@ class Window(Gtk.ApplicationWindow):
 
         self.content = Gtk.Stack()
         self.content.set_transition_type(Gtk.StackTransitionType.OVER_LEFT)
-        self.content.set_transition_duration(250)
+        self.content.set_transition_duration(200)
         self.content.props.margin = 24
         self.add(self.content)
 
@@ -128,6 +128,9 @@ class Window(Gtk.ApplicationWindow):
         self.headerbar.right_button_stack.set_sensitive(sensitive)
         self.app_list.select_all_check.set_sensitive(sensitive)
         
+        for package in self.app_list.packages:
+            package.checkbox.set_sensitive(sensitive)
+        
     def quit_app(self):
         self.app.quit()
     
@@ -175,11 +178,3 @@ class Window(Gtk.ApplicationWindow):
         self.headerbar.set_left_button('cancel')
         self.set_buttons_sensitive(True)
         self.app_list.select_all_check.set_sensitive(True)
-        self.app_list.select_all_check.set_active(False)
-
-        for app in self.app_list.packages:
-            if 'Installed' in app.status_label.get_text():
-                app.checkbox.set_active(True)
-
-            else:
-                app.checkbox.set_active(False)
