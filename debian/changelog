@@ -1,3 +1,9 @@
+pop-transition (1.0.0) eoan; urgency=medium
+
+  * First release version
+
+ -- Ian Santopietro <ian@system76.com>  Thu, 28 May 2020 11:01:14 -0600
+
 pop-transition (0.6.4) eoan; urgency=medium
 
   * Hide Transition App from App Lists
