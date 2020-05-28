@@ -57,14 +57,6 @@ APPS = {
         'old_id': None,
         'deb_pkg': 'dbeaver-ce'
     },
-    'discord': {
-        'name': 'Discord',
-        'version': '0.0.10',
-        'icon': 'discord',
-        'id': 'com.discordapp.Discord',
-        'old_id': None,
-        'deb_pkg': 'discord'
-    },
     'gitkraken': {
         'name': 'GitKracken',
         'version': '6.6.0',
