@@ -126,8 +126,14 @@ class Package(Gtk.Grid):
         """ bool: whether the deb-package is installed."""
         if self.cache is None:
             self.cache = apt.get_cache()
-        pkg = self.cache[self.deb_package]
-        return pkg.is_installed
+        
+        try:
+            pkg = self.cache[self.deb_package]
+            return pkg.is_installed
+        
+        # If the cache doesn't have the package, we know it's not installed
+        except KeyError:
+            return False
 
     @property
     def name(self):
