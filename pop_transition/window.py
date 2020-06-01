@@ -140,16 +140,16 @@ class Window(Gtk.ApplicationWindow):
     def set_summary_text(self):
         buffer = self.summary_view.get_buffer()
         summary_text = _('The following Flatpaks were installed:\n')
-
+        
         for package in self.app_list.packages:
-            if package.installed_status == 'Installed':
+            if package.installed_status == 'installed':
                 # Translators: Do not translate this string
                 summary_text += f'    {package.name} ({package.app_id})\n'
             
-            if package.installed_status == 'Already Installed':
+            if package.installed_status == 'already installed':
                 # Translators: Do not translate this string
                 summary_text += f'    {package.name}'
-                summary_text += ' Already Installed\n'
+                summary_text += _(' Already Installed\n')
         
         summary_text += _('\nThe following Debian packages were removed:\n')
         for package in self.app_list.packages:
@@ -157,6 +157,11 @@ class Window(Gtk.ApplicationWindow):
                 # Translators: Do not translate this string
                 summary_text += f'    {package.name} ({package.deb_package})\n'
         
+        summary_text += '\n\n'
+        for package in self.app_list.packages:
+            if package.installed_status.startswith('Error'):
+                summary_text += f'{package.name} {package.installed_status}\n'
+
         buffer.set_text(summary_text)
     
     def show_summary(self):
@@ -184,3 +189,5 @@ class Window(Gtk.ApplicationWindow):
 
         for package in self.app_list.packages:
             package.source = "Pop!_OS Repo"
+            if "Error" in package.installed_status:
+                package.checkbox.set_active(False)
