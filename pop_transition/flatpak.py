@@ -24,7 +24,7 @@ pop-transition - flatpak interface module.
 """
 
 from threading import Thread
-from gi.repository.Flatpak import RefKind
+from gi.repository import Flatpak, GLib
 from gi.repository.GObject import idle_add
 from repoman import flatpak_helper
 
@@ -70,22 +70,76 @@ class InstallThread(Thread):
     
     def run(self):
         print('Installing Flatpaks...')
+        
+        # We use a transaction to get error details and to install dependencies 
+        transaction = Flatpak.Transaction.new_for_installation(self.user)
+        transaction.connect('new_operation', self.on_new_operation)
+        transaction.connect('operation-done', self.on_operation_done)
+        transaction.connect('operation-error', self.on_operation_error)
+
         for package in self.packages:
             print(f'Installing {package.name} flatpak {package.app_id}.')
+            remote_ref = self.user.fetch_remote_ref_sync(
+                self.flathub.get_name(),
+                Flatpak.RefKind.APP,
+                package.app_id,
+                None,
+                'stable'
+            )
             try:
-                self.user.install(
-                    self.flathub.get_name(),
-                    RefKind.APP,
-                    package.app_id,
-                    None,
-                    'stable'
+                transaction.add_install(
+                    self.flathub.get_name(), remote_ref.format_ref()
                 )
+                idle_add(package.set_status_text, 'Waiting')
+            except GLib.Error as err:
                 idle_add(package.stop_spinner)
-                idle_add(package.set_status_text, 'Flatpak Installed')
-                idle_add(package.set_installed_status, 'Installed')
-            except:
-                idle_add(package.stop_spinner)
-                idle_add(package.set_status_text, 'Already Installed')
-                idle_add(package.set_installed_status, 'Already Installed')
-        
+                
+                # Package is already installed, inform the user
+                if 'is already installed' in err.message:
+                    idle_add(package.set_status_text, 'Already Installed')
+                    idle_add(package.set_installed_status, 'already installed')
+                
+                # Or there was some other error, let the user know
+                else:
+                    idle_add(package.set_status_text, 'Error installing')
+                    idle_add(package.set_installed_status, err.message)
+                
+        transaction.run()
         idle_add(self.window.show_apt_remove)
+    
+    def get_package_from_operation(self, operation):
+        ref = operation.get_ref()
+        ref_name = ref.split('/')[1]
+        print(f'Looking for ID from ref {ref}')
+
+        for package in self.packages:
+            if ref_name == package.app_id:
+                print(f'Found ID {ref_name} in package {package.name}')
+                return package
+    
+    def on_new_operation(self, transaction, operation, progress):
+        package = self.get_package_from_operation(operation)
+        
+        # Don't try and update UI if there is no pacakge (probably a runtime)
+        if package:
+            idle_add(package.start_spinner)
+            idle_add(package.set_status_text, 'Installing')
+
+    def on_operation_done(self, transaction, operation, commit, result):
+        package = self.get_package_from_operation(operation)
+        
+        # Don't try and update UI if there is no pacakge (probably a runtime)
+        if package:
+            idle_add(package.stop_spinner)
+            idle_add(package.set_status_text, "Flatpak installed")
+            idle_add(package.set_installed_status, 'installed')
+    
+    def on_operation_error(self, transaction, operation, error, details):
+        package = self.get_package_from_operation(operation)
+        error_text = f"Error: {error.message}"
+        
+        # Don't try and update UI if there is no pacakge (probably a runtime)
+        if package:
+            idle_add(package.stop_spinner)
+            idle_add(package.set_status_text, "Error installing")
+            idle_add(package.set_installed_status, error_text)

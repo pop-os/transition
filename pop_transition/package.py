@@ -84,6 +84,7 @@ class Package(Gtk.Grid):
         self.status_label = Gtk.Label()
         self.status_label.set_halign(Gtk.Align.END)
         self.status_label.set_hexpand(True)
+        self.status_label.set_line_wrap(True)
         self.status_label.set_xalign(1)
         Gtk.StyleContext.add_class(self.status_label.get_style_context(), 
                                    'dim-label')
@@ -95,6 +96,10 @@ class Package(Gtk.Grid):
 
         self.source = 'Flathub'
 
+    def start_spinner(self):
+        """ Sets this package as busy"""
+        self.spinner.start()
+        
     def stop_spinner(self):
         """ Unsets this package as busy"""
         self.spinner.stop()
