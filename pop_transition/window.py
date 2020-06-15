@@ -118,6 +118,13 @@ class Window(Gtk.ApplicationWindow):
         if dismissal.is_dismissed():
             self.dismiss_button.set_show()
 
+        self.headerbar.continue_button.connect(
+            'clicked', self.on_continue_clicked
+        )
+        self.headerbar.back_button.connect(
+            'clicked', self.on_back_clicked
+        )
+
         self.content.set_visible_child_name('first_page')
         self.show_all()
         self.current_page = 'flatpak'
@@ -137,6 +144,57 @@ class Window(Gtk.ApplicationWindow):
         }
 
         pages[page]
+    
+    def move_pages(self, direction):
+        """ Move to the next or previous page.
+
+        Arguments:
+            direction (str): The direction to go, invalid directions are ignored.
+        """
+        current_index = self.pages.index(self.current_page)
+        
+        if direction in ['next', 'forward']:
+            self.current_page = self.pages[current_index + 1]
+        
+        elif direction in ['back', 'previous']:
+            self.current_page = self.pages[current_index - 1]
+
+    def set_visible_buttons(self):
+        """ Sets the correct combination of headerbar buttons.
+
+        We need to take into account the current page we're on.
+        """
+        number_checked = 0
+        for package in self.app_list.packages:
+            if package.checkbox.get_active():
+                number_checked += 1
+        
+        if self.current_page == 'flatpak':
+            self.headerbar.left_button_stack.show()
+            self.headerbar.right_button_stack.show()
+            self.headerbar.set_left_button('cancel')
+            
+            if number_checked != 0:
+                self.headerbar.set_right_button('install')
+            
+            else:
+                self.headerbar.set_right_button('continue')
+        
+        elif self.current_page == 'apt':
+            self.headerbar.left_button_stack.show()
+            self.headerbar.right_button_stack.show()
+            self.headerbar.set_left_button('back')
+
+            if number_checked != 0:
+                self.headerbar.set_right_button('remove')
+            
+            else:
+                self.headerbar.set_left_button('continue')
+        
+        else:
+            self.headerbar.left_button_stack.hide()
+            self.headerbar.right_button_stack.show()
+            self.headerbar.set_right_button('close')
     
     def set_buttons_sensitive(self, sensitive):
         """ Sets the buttons in the GUI to be either sensitive or insensitive.
@@ -204,15 +262,8 @@ class Window(Gtk.ApplicationWindow):
                 package.checkbox.set_active(False)
         
         self._current_page = 'apt'
+        self.set_visible_buttons()
     
-    def show_summary_page(self):
-        self.content.set_visible_child_name('summary')
-        self.headerbar.left_button_stack.hide()
-        self.headerbar.set_right_button('close')
-        self.set_summary_text()
-        self.set_buttons_sensitive(True)
-        self._current_page = 'summary'
-
     def show_flatpak_page(self):
         """ Change the GUI into Apt removal mode."""
         self.backup_label.show()
@@ -236,3 +287,19 @@ class Window(Gtk.ApplicationWindow):
                 package.checkbox.set_active(False)
         
         self._current_page = 'flatpak'
+        self.set_visible_buttons()
+
+    def show_summary_page(self):
+        self.content.set_visible_child_name('summary')
+        self.headerbar.left_button_stack.hide()
+        self.headerbar.set_right_button('close')
+        self.set_summary_text()
+        self.set_buttons_sensitive(True)
+        self._current_page = 'summary'
+        self.set_visible_buttons()
+
+    def on_continue_clicked(self, button):
+        self.move_pages('next')
+
+    def on_back_clicked(self, button):
+        self.move_pages('back')

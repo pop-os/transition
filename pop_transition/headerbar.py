@@ -38,10 +38,12 @@ class Headerbar(Gtk.HeaderBar):
         
         # Left side
         self.cancel_button = Gtk.Button.new_with_label(_('Cancel'))
+        self.back_button = Gtk.Button.new_with_label(_('Back'))
 
         self.left_button_stack = Gtk.Stack()
         self.pack_start(self.left_button_stack)
         self.left_button_stack.add_named(self.cancel_button, 'cancel')
+        self.left_button_stack.add_named(self.back_button, 'back')
         
         self.left_button_stack.set_visible_child_name('cancel')
         
@@ -78,14 +80,14 @@ class Headerbar(Gtk.HeaderBar):
         Returns:
             The Gtk.Button that was set
         """
-        if name in ['cancel']:
+        if name in ['cancel', 'back']:
             self.left_button_stack.set_visible_child_name(name)
             button = self.left_button_stack.get_visible_child()
             return button
         else:
             raise Exception(
                 f'{name} is not a valid child of window.headerbar.'
-                'left_button_stack. Please choose "cancel".'
+                'left_button_stack. Please choose "cancel" or "back".'
             )
     
     def set_right_button(self, name):
