@@ -1,3 +1,10 @@
+pop-transition (1.0.1) eoan; urgency=medium
+
+  * Add page transitions between Flatpak and Apt pages.
+  * Use a "Continue" button until the user selects a package to install/remove.
+
+ -- Ian Santopietro <ian@system76.com>  Mon, 15 Jun 2020 14:17:17 -0600
+
 pop-transition (1.0.0) eoan; urgency=medium
 
   * First release version
