@@ -41,11 +41,12 @@ class Headerbar(Gtk.HeaderBar):
         self.back_button = Gtk.Button.new_with_label(_('Back'))
 
         self.left_button_stack = Gtk.Stack()
+        self.left_button_stack.set_transition_type(
+            Gtk.StackTransitionType.CROSSFADE
+        )
         self.pack_start(self.left_button_stack)
         self.left_button_stack.add_named(self.cancel_button, 'cancel')
         self.left_button_stack.add_named(self.back_button, 'back')
-        
-        self.left_button_stack.set_visible_child_name('cancel')
         
         # Right side
         self.install_button = Gtk.Button.new_with_label(_('Install'))
@@ -53,8 +54,6 @@ class Headerbar(Gtk.HeaderBar):
                                    'suggested-action')
 
         self.continue_button = Gtk.Button.new_with_label(_('Continue'))
-        Gtk.StyleContext.add_class(self.continue_button.get_style_context(),
-                                   'suggested-action')
         
         self.remove_button = Gtk.Button.new_with_label(_('Remove'))
         Gtk.StyleContext.add_class(self.remove_button.get_style_context(),
@@ -63,13 +62,14 @@ class Headerbar(Gtk.HeaderBar):
         self.close_button = Gtk.Button.new_with_label(_('Close'))
 
         self.right_button_stack = Gtk.Stack()
+        self.right_button_stack.set_transition_type(
+            Gtk.StackTransitionType.CROSSFADE
+        )
         self.pack_end(self.right_button_stack)
         self.right_button_stack.add_named(self.install_button, 'install')
         self.right_button_stack.add_named(self.continue_button, 'continue')
         self.right_button_stack.add_named(self.remove_button, 'remove')
         self.right_button_stack.add_named(self.close_button, 'close')
-
-        self.right_button_stack.set_visible_child_name('install')
     
     def set_left_button(self, name):
         """ Sets the button on the left-hand side of the headerbar.

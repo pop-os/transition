@@ -118,12 +118,11 @@ class Window(Gtk.ApplicationWindow):
         if dismissal.is_dismissed():
             self.dismiss_button.set_show()
 
-        self.headerbar.continue_button.connect(
-            'clicked', self.on_continue_clicked
-        )
-        self.headerbar.back_button.connect(
-            'clicked', self.on_back_clicked
-        )
+        for button in [self.headerbar.continue_button, self.headerbar.back_button]:
+            button.connect('clicked', self.move_pages)
+        
+        for package in self.app_list.packages:
+            package.checkbox.connect('toggled', self.set_visible_buttons)
 
         self.content.set_visible_child_name('first_page')
         self.show_all()
@@ -142,24 +141,19 @@ class Window(Gtk.ApplicationWindow):
             'flatpak': self.show_flatpak_page,
             'summary': self.show_summary_page
         }
-
-        pages[page]
+        pages[page]()
     
-    def move_pages(self, direction):
-        """ Move to the next or previous page.
-
-        Arguments:
-            direction (str): The direction to go, invalid directions are ignored.
-        """
+    def move_pages(self, button):
+        """ Move to the next or previous page."""
         current_index = self.pages.index(self.current_page)
         
-        if direction in ['next', 'forward']:
+        if button is self.headerbar.continue_button:
             self.current_page = self.pages[current_index + 1]
         
-        elif direction in ['back', 'previous']:
+        elif button is self.headerbar.back_button:
             self.current_page = self.pages[current_index - 1]
 
-    def set_visible_buttons(self):
+    def set_visible_buttons(self, *args, **kwargs):
         """ Sets the correct combination of headerbar buttons.
 
         We need to take into account the current page we're on.
@@ -189,7 +183,7 @@ class Window(Gtk.ApplicationWindow):
                 self.headerbar.set_right_button('remove')
             
             else:
-                self.headerbar.set_left_button('continue')
+                self.headerbar.set_right_button('continue')
         
         else:
             self.headerbar.left_button_stack.hide()
@@ -251,8 +245,6 @@ class Window(Gtk.ApplicationWindow):
                 'applications from Pop Shop.'
             )
         )
-        self.headerbar.set_right_button('remove')
-        self.headerbar.set_left_button('cancel')
         self.set_buttons_sensitive(True)
         self.app_list.select_all_check.set_sensitive(True)
 
@@ -276,8 +268,6 @@ class Window(Gtk.ApplicationWindow):
                 'packages.'
             )
         )
-        self.headerbar.set_right_button('continue')
-        self.headerbar.set_left_button('cancel')
         self.set_buttons_sensitive(True)
         self.app_list.select_all_check.set_sensitive(True)
 
@@ -291,15 +281,7 @@ class Window(Gtk.ApplicationWindow):
 
     def show_summary_page(self):
         self.content.set_visible_child_name('summary')
-        self.headerbar.left_button_stack.hide()
-        self.headerbar.set_right_button('close')
         self.set_summary_text()
         self.set_buttons_sensitive(True)
         self._current_page = 'summary'
         self.set_visible_buttons()
-
-    def on_continue_clicked(self, button):
-        self.move_pages('next')
-
-    def on_back_clicked(self, button):
-        self.move_pages('back')
