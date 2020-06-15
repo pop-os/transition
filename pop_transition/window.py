@@ -45,6 +45,7 @@ class Window(Gtk.ApplicationWindow):
         super().__init__(application=app)
 
         self.app = app
+        self.pages = ['flatpak', 'apt', 'summary']
         
         self.set_default_size(500, 550)
         self.set_resizable(False)
@@ -119,6 +120,23 @@ class Window(Gtk.ApplicationWindow):
 
         self.content.set_visible_child_name('first_page')
         self.show_all()
+        self.current_page = 'flatpak'
+    
+    @property
+    def current_page(self):
+        """str: the currently active page."""
+        return self._current_page
+    
+    @current_page.setter
+    def current_page(self, page):
+        """ We need to set the GUI up correctly."""
+        pages = {
+            'apt': self.show_apt_page,
+            'flatpak': self.show_flatpak_page,
+            'summary': self.show_summary_page
+        }
+
+        pages[page]
     
     def set_buttons_sensitive(self, sensitive):
         """ Sets the buttons in the GUI to be either sensitive or insensitive.
@@ -163,16 +181,9 @@ class Window(Gtk.ApplicationWindow):
                 summary_text += f'{package.name} {package.installed_status}\n'
 
         buffer.set_text(summary_text)
-    
-    def show_summary(self):
-        self.content.set_visible_child_name('summary')
-        self.headerbar.left_button_stack.hide()
-        self.headerbar.set_right_button('close')
-        self.set_summary_text()
-        self.set_buttons_sensitive(True)
-    
-    def show_apt_remove(self):
-        """ Change the GUI into Apt removal mode."""
+
+    def show_apt_page(self):
+        """ Show the Apt page for removing Debs."""
         self.backup_label.hide()
         self.description_label.set_text(
             _(
@@ -191,3 +202,37 @@ class Window(Gtk.ApplicationWindow):
             package.source = "Pop!_OS Repo"
             if "Error" in package.installed_status:
                 package.checkbox.set_active(False)
+        
+        self._current_page = 'apt'
+    
+    def show_summary_page(self):
+        self.content.set_visible_child_name('summary')
+        self.headerbar.left_button_stack.hide()
+        self.headerbar.set_right_button('close')
+        self.set_summary_text()
+        self.set_buttons_sensitive(True)
+        self._current_page = 'summary'
+
+    def show_flatpak_page(self):
+        """ Change the GUI into Apt removal mode."""
+        self.backup_label.show()
+        self.description_label.set_text(
+            _(
+                'Please reinstall the following applications to ensure your '
+                'software stays up-to-date. First, install the Flatpak versions '
+                'of these applications, as the Debian packages will no longer '
+                'receive updates. Then you will be able to remove the Debian '
+                'packages.'
+            )
+        )
+        self.headerbar.set_right_button('continue')
+        self.headerbar.set_left_button('cancel')
+        self.set_buttons_sensitive(True)
+        self.app_list.select_all_check.set_sensitive(True)
+
+        for package in self.app_list.packages:
+            package.source = "Pop!_OS Repo"
+            if "Error" in package.installed_status:
+                package.checkbox.set_active(False)
+        
+        self._current_page = 'flatpak'

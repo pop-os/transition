@@ -84,5 +84,5 @@ class RemoveThread(Thread):
             if package.deb_package in success:
                 idle_add(package.set_removed, True)
         
-        idle_add(self.window.show_summary)
+        idle_add(self.window.show_summary_page)
 
