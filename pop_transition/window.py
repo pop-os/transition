@@ -114,15 +114,12 @@ class Window(Gtk.ApplicationWindow):
         self.summary_view = Gtk.TextView()
         summary_scroll.add(self.summary_view)
 
-        # Change thje text is case the notifications are already hidden
+        # Change the text is case the notifications are already hidden
         if dismissal.is_dismissed():
             self.dismiss_button.set_show()
 
         for button in [self.headerbar.continue_button, self.headerbar.back_button]:
             button.connect('clicked', self.move_pages)
-        
-        for package in self.app_list.packages:
-            package.checkbox.connect('toggled', self.set_visible_buttons)
 
         self.content.set_visible_child_name('first_page')
         self.show_all()
@@ -209,29 +206,41 @@ class Window(Gtk.ApplicationWindow):
     
     def set_summary_text(self):
         buffer = self.summary_view.get_buffer()
+        app_counter = 0
+
         summary_text = _('The following Flatpaks were installed:\n')
-        
         for package in self.app_list.packages:
             if package.installed_status == 'installed':
+                app_counter += 1
                 # Translators: Do not translate this string
                 summary_text += f'    {package.name} ({package.app_id})\n'
             
             if package.installed_status == 'already installed':
+                app_counter += 1
                 # Translators: Do not translate this string
                 summary_text += f'    {package.name}'
                 summary_text += _(' Already Installed\n')
         
+        if app_counter == 0:
+            summary_text += 'None\n'
+        
+        app_counter = 0
+        
         summary_text += _('\nThe following Debian packages were removed:\n')
         for package in self.app_list.packages:
             if package.removed:
+                app_counter += 1
                 # Translators: Do not translate this string
                 summary_text += f'    {package.name} ({package.deb_package})\n'
+
+        if app_counter == 0:
+            summary_text += 'None\n'
         
         summary_text += '\n\n'
         for package in self.app_list.packages:
             if package.installed_status.startswith('Error'):
                 summary_text += f'{package.name} {package.installed_status}\n'
-
+        
         buffer.set_text(summary_text)
 
     def show_apt_page(self):
