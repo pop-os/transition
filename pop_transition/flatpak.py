@@ -105,7 +105,7 @@ class InstallThread(Thread):
                     idle_add(package.set_installed_status, err.message)
                 
         transaction.run()
-        idle_add(self.window.show_apt_remove)
+        idle_add(self.window.show_apt_page)
     
     def get_package_from_operation(self, operation):
         ref = operation.get_ref()

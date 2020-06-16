@@ -50,9 +50,9 @@ class Application(Gtk.Application):
         print('showing window')
         self.withdraw_notification('transition-ready')
         self.window = Window(self)
-        self.connect_signals(self.window)
         for package in self.get_installed_packages():
                 self.window.app_list.add_package(package)
+        self.connect_signals(self.window)
         self.window.show_all()
     
     def connect_signals(self, window):
@@ -71,6 +71,9 @@ class Application(Gtk.Application):
         window.dismiss_button.connect(
             'clicked', self.on_dmismiss_clicked, window
         )
+
+        for package in window.app_list.packages:
+            package.checkbox.connect('toggled', window.set_visible_buttons)
     
     def on_dmismiss_clicked(self, button, window, data=None):
         if not dismissal.is_dismissed():
