@@ -76,14 +76,6 @@ APPS = {
         'old_id': None,
         'deb_pkg': 'keepassxc'
     },
-    'lollypop': {
-        'name': 'Lollypop',
-        'version': '1.2.35',
-        'icon': 'org.gnome.Lollypop',
-        'id': 'org.gnome.Lollypop',
-        'old_id': None,
-        'deb_pkg': 'lollypop'
-    },
     'mattermost': {
         'name': 'Mattermost',
         'version': '4.4.1',
@@ -92,14 +84,6 @@ APPS = {
         'old_id': None,
         'deb_pkg': 'mattermost-desktop'
     },
-    'peek': {
-        'name': 'Peek',
-        'version': '1.5.1',
-        'icon': 'com.uploadedlobster.peek',
-        'id': 'com.uploadedlobster.peek',
-        'old_id': None,
-        'deb_pkg': 'peek'
-    },
     'signal': {
         'name': 'Signal',
         'version': '1.33.4',
@@ -107,14 +91,6 @@ APPS = {
         'id': 'org.signal.Signal',
         'old_id': None,
         'deb_pkg': 'signal-desktop'
-    },
-    'spotify': {
-        'name': 'Spotify',
-        'version': '1.1.26.501',
-        'icon': 'spotify-client',
-        'id': 'com.spotify.Client',
-        'old_id': None,
-        'deb_pkg': 'spotify-client'
     },
     'wire': {
         'name': 'Wire',
