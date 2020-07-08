@@ -131,7 +131,7 @@ class Application(Gtk.Application):
             pkg.source = 'Flathub'
             pkg.app_id = self.app_list[app]['id']
             pkg.deb_package = self.app_list[app]['deb_pkg']
-            if pkg.installed and pkg.upgrade_origin == "Ubuntu":
+            if pkg.installed and pkg.upgrade_origin == "":
                 yield pkg
 
     def on_quit_clicked(self, button, data=None):
