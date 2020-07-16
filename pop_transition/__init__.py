@@ -92,6 +92,14 @@ APPS = {
         'old_id': None,
         'deb_pkg': 'signal-desktop'
     },
+    'spotify': {
+        'name': 'Spotify',
+        'version': '1.1.26.501',
+        'icon': 'spotify-client',
+        'id': 'com.spotify.Client',
+        'old_id': None,
+        'deb_pkg': 'spotify-client'
+    },
     'wire': {
         'name': 'Wire',
         'version': '3.17.2924',
