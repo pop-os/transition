@@ -141,6 +141,18 @@ class Package(Gtk.Grid):
             return False
 
     @property
+    def upgrade_origin(self):
+        """ str: the origin that will be used if the package is upgraded"""
+        if self.cache is None:
+            self.cache = apt.get_cache()
+
+        try:
+            pkg = self.cache[self.deb_package]
+            return pkg.candidate.origins[0].origin
+        except Exception:
+            return None
+
+    @property
     def name(self):
         """ str: The name of the application. """
         return self.name_label.get_text()
