@@ -52,6 +52,14 @@ APPS = {
         'old_id': None,
         'deb_pkg': 'android-studio'
     },
+    'chromium': {
+        'name': 'Chromium',
+        'version': '87.0.4280.88-1',
+        'icon': 'chromium',
+        'id': 'org.chromium.Chromium',
+        'old_id': None,
+        'deb_pkg': 'chromium'
+    },
     'dbeaver': {
         'name': 'DBeaver',
         'version': '7.0.4',
