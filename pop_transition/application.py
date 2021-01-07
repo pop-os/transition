@@ -98,14 +98,6 @@ class Application(Gtk.Application):
             package.status = f'Checking'
 
             if package.checkbox.get_active():
-                if package.old_config and package.new_config:
-                    package.status = 'Migrating configuration'
-                    try:
-                        shutil.copytree(package.old_config, package.new_config)
-                    except shutil.Error:
-                        msg = f'Could not copy config for {package.name} '
-                        msg += f'from {package.old_config} to {package.new_config}.'
-                        print(msg)
                 package.status = f'Removing deb {package.deb_package}'
                 remove_debs.append(package)
             else:
@@ -129,6 +121,17 @@ class Application(Gtk.Application):
                 package.spinner.stop()
                 package.status = ''
         flatpak.install_flatpaks(install_flatpaks, window)
+
+        for package in window.app_list.packages:
+            if package.checkbox.get_active:
+                if package.old_config and package.new_config:
+                        package.status = 'Migrating configuration'
+                        try:
+                            shutil.copytree(package.old_config, package.new_config)
+                        except shutil.Error:
+                            msg = f'Could not copy config for {package.name} '
+                            msg += f'from {package.old_config} to {package.new_config}.'
+                            print(msg)
     
     def get_installed_packages(self):
         """ Yield a list of installed Packages."""
