@@ -240,7 +240,7 @@ class Package(Gtk.Grid):
     @property
     def new_config(self):
         """ The path to the flatpak configuration directory."""
-        return Path.home() / self._old_config
+        return Path.home() / self._new_config
     
     @new_config.setter
     def new_config(self, config):
