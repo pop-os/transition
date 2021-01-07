@@ -24,6 +24,7 @@ pop-transition - Main Application
 """
 
 import gettext
+import shutil
 
 from gi.repository import Gtk, Gio
 
@@ -97,6 +98,14 @@ class Application(Gtk.Application):
             package.status = f'Checking'
 
             if package.checkbox.get_active():
+                if package.old_config and package.new_config:
+                    package.status = 'Migrating configuration'
+                    try:
+                        shutil.copytree(package.old_config, package.new_config)
+                    except shutil.Error:
+                        msg = f'Could not copy config for {package.name} '
+                        msg += f'from {package.old_config} to {package.new_config}.'
+                        print(msg)
                 package.status = f'Removing deb {package.deb_package}'
                 remove_debs.append(package)
             else:
@@ -131,6 +140,8 @@ class Application(Gtk.Application):
             pkg.source = 'Flathub'
             pkg.app_id = self.app_list[app]['id']
             pkg.deb_package = self.app_list[app]['deb_pkg']
+            pkg.old_config = self.app_list[app]['old_config']
+            pkg.new_config = self.app_list[app]['new_config']
             if pkg.installed and pkg.upgrade_origin in ("", "system76", "LP-PPA-system76-pop"):
                 yield pkg
 

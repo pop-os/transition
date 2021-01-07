@@ -50,7 +50,9 @@ APPS = {
         'icon': 'androidstudio',
         'id': 'com.google.AndroidStudio',
         'old_id': None,
-        'deb_pkg': 'android-studio'
+        'deb_pkg': 'android-studio',
+        'old_config': None,
+        'new_config': None
     },
     'chromium': {
         'name': 'Chromium',
@@ -58,7 +60,9 @@ APPS = {
         'icon': 'chromium',
         'id': 'org.chromium.Chromium',
         'old_id': None,
-        'deb_pkg': 'chromium'
+        'deb_pkg': 'chromium',
+        'old_config': '.config/chromium/',
+        'new_config': '.var/app/org.chromium.Chromium/config/chromium/'
     },
     'dbeaver': {
         'name': 'DBeaver',
@@ -66,7 +70,9 @@ APPS = {
         'icon': '/usr/share/dbeaver/dbeaver.png',
         'id': 'io.dbeaver.DBeaverCommunity',
         'old_id': None,
-        'deb_pkg': 'dbeaver-ce'
+        'deb_pkg': 'dbeaver-ce',
+        'old_config': None,
+        'new_config': None
     },
     'gitkraken': {
         'name': 'GitKracken',
@@ -74,7 +80,9 @@ APPS = {
         'icon': 'gitkraken',
         'id': 'com.axosoft.GitKraken',
         'old_id': None,
-        'deb_pkg': 'gitkraken'
+        'deb_pkg': 'gitkraken',
+        'old_config': None,
+        'new_config': None
     },
     'keepassxc': {
         'name': 'KeePassXC',
@@ -82,7 +90,9 @@ APPS = {
         'icon': 'keepassxc',
         'id': 'org.keepassxc.KeePassXC',
         'old_id': None,
-        'deb_pkg': 'keepassxc'
+        'deb_pkg': 'keepassxc',
+        'old_config': None,
+        'new_config': None
     },
     'mattermost': {
         'name': 'Mattermost',
@@ -90,7 +100,9 @@ APPS = {
         'icon': 'mattermost-desktop',
         'id': 'com.mattermost.Desktop',
         'old_id': None,
-        'deb_pkg': 'mattermost-desktop'
+        'deb_pkg': 'mattermost-desktop',
+        'old_config': None,
+        'new_config': None
     },
     'signal': {
         'name': 'Signal',
@@ -98,7 +110,9 @@ APPS = {
         'icon': 'signal-desktop',
         'id': 'org.signal.Signal',
         'old_id': None,
-        'deb_pkg': 'signal-desktop'
+        'deb_pkg': 'signal-desktop',
+        'old_config': None,
+        'new_config': None
     },
     'spotify': {
         'name': 'Spotify',
@@ -106,7 +120,9 @@ APPS = {
         'icon': 'spotify-client',
         'id': 'com.spotify.Client',
         'old_id': None,
-        'deb_pkg': 'spotify-client'
+        'deb_pkg': 'spotify-client',
+        'old_config': None,
+        'new_config': None
     },
     'wire': {
         'name': 'Wire',
@@ -114,7 +130,9 @@ APPS = {
         'icon': 'wire-desktop',
         'id': 'com.wire.WireDesktop',
         'old_id': None,
-        'deb_pkg': 'wire-desktop'
+        'deb_pkg': 'wire-desktop',
+        'old_config': None,
+        'new_config': None
     },
 }
 
