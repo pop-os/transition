@@ -24,6 +24,7 @@ pop-transition - Packages displayed within the list.
 """
 
 import gettext
+from pathlib import Path
 
 from gi.repository import Gtk, GdkPixbuf, GLib
 
@@ -226,6 +227,26 @@ class Package(Gtk.Grid):
     @deb_package.setter
     def deb_package(self, deb):
         self._deb_name = deb
+    
+    @property
+    def old_config(self):
+        """ str: the path to the old configuration directory."""
+        if self._old_config:
+            return Path.home() / self._old_config
+        return None
+    
+    @old_config.setter
+    def old_config(self, config):
+        self._old_config = config
+    
+    @property
+    def new_config(self):
+        """ The path to the flatpak configuration directory."""
+        return Path.home() / self._new_config
+    
+    @new_config.setter
+    def new_config(self, config):
+        self._new_config = config
     
     @property
     def status(self):
