@@ -132,6 +132,10 @@ class Application(Gtk.Application):
                             msg = f'Could not copy config for {package.name} '
                             msg += f'from {package.old_config} to {package.new_config}.'
                             print(msg)
+                        except FileExistsError:
+                            msg = f'Config for {package.name} already exists in '
+                            msg += f'{package.new_config}.'
+                            print(msg)
     
     def get_installed_packages(self):
         """ Yield a list of installed Packages."""
