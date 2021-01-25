@@ -231,7 +231,9 @@ class Package(Gtk.Grid):
     @property
     def old_config(self):
         """ str: the path to the old configuration directory."""
-        return Path.home() / self._old_config
+        if self._old_config:
+            return Path.home() / self._old_config
+        return None
     
     @old_config.setter
     def old_config(self, config):
