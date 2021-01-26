@@ -1,9 +1,0 @@
-Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Upstream-Name: pop-transition
-Upstream-Contact: ian@system76.com
-Source: http://github.com/pop-os/pop-transition
-
-Files: *
-Copyright: 2020 Ian Santopietro <ian@system76.com>
-           2020 System76, Inc.
-License: GLP-3
