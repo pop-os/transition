@@ -149,7 +149,7 @@ class FlathubDialog(Gtk.Dialog):
         # We do this in a thread because we don't know how long it will take 
         # to download the flatpakrepo file or how long it will take to save to
         # the disk. This prevents the GUI from locking up. 
-        add_thread = AddThread(self, 'Flathub', FLATPAKREPO_URL)
+        add_thread = AddThread(self, FLATPAKREPO_URL)
         self.spinner.start()
         self.set_sensitive(False)
         add_thread.start()
@@ -166,10 +166,9 @@ class FlathubDialog(Gtk.Dialog):
 
 class AddThread(Thread):
 
-    def __init__(self, dialog, name, url):
+    def __init__(self, dialog, url):
         super().__init__()
         self.dialog = dialog
-        self.name = name
         self.url = url
 
     def run(self):
@@ -179,7 +178,7 @@ class AddThread(Thread):
             a, contents, b = repofile.load_contents()
             repodata = GLib.Bytes.new(contents)
             
-            new_remote = Flatpak.Remote.new_from_file(self.name, repodata)
+            new_remote = Flatpak.Remote.new_from_file('flathub', repodata)
             installation.add_remote(new_remote, True, None)
         
         except GLib.Error as e:
