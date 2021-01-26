@@ -53,9 +53,10 @@ class FlathubDialog(Gtk.Dialog):
         self.set_transient_for(main_window)
 
         self.content_area = self.get_content_area()
+        self.content_area.set_orientation(Gtk.Orientation.VERTICAL)
         
         self.content_grid = Gtk.Grid()
-        self.content_grid.set_row_spacing(6)
+        self.content_grid.set_row_spacing(12)
         self.content_grid.set_column_spacing(12)
         self.content_grid.props.margin = 12
         self.content_area.add(self.content_grid)
@@ -74,22 +75,34 @@ class FlathubDialog(Gtk.Dialog):
         self.message.set_line_wrap(True)
         self.message.set_width_chars(40)
         self.content_grid.attach(self.message, 1, 1, 1, 1)
+        
+        self.show_all()
 
+        self.status_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+        self.status_box.set_visible(False)
+        self.status_box.set_margin_top(24)
+        self.status_box.set_margin_bottom(12)
+        self.content_area.add(self.status_box)
+
+        self.spinner = Gtk.Spinner()
+        self.spinner.set_halign(Gtk.Align.END)
+        self.spinner.start()
+        self.spinner.show()
+        self.status_box.pack_start(self.spinner, True, True, 6)
+        
         self.status = Gtk.Label.new('')
         self.status.set_line_wrap(True)
         self.status.set_line_wrap_mode(Pango.WrapMode.WORD_CHAR)
-        self.status.set_width_chars(60)
-        self.content_grid.attach(self.status, 0, 3, 2, 1)
-
-        self.spinner = Gtk.Spinner()
+        self.status.set_halign(Gtk.Align.START)
+        self.status.set_max_width_chars(40)
+        self.status.show()
+        self.status_box.pack_start(self.status, True, True, 6)
 
         self.ok_button = self.get_widget_for_response(Gtk.ResponseType.OK)
         Gtk.StyleContext.add_class(
             self.ok_button.get_style_context(),
             'suggested-action'
         )
-
-        self.show_all()
 
     def setup_for_missing(self):
         """ Set up the dialog for adding a missing Flathub remote."""
@@ -106,6 +119,8 @@ class FlathubDialog(Gtk.Dialog):
         self.message.set_text(message_text)
         self.ok_button.set_label(_('Add Flathub'))
         self.ok_button.connect('clicked', self.fix_missing)
+        status = _('Adding flathub from {}').format(FLATPAKREPO_URL)
+        self.status.set_text(status)
 
     def setup_for_disabled(self):
         """ Set up the dialog for adding a disabled Flathub remote."""
@@ -122,25 +137,25 @@ class FlathubDialog(Gtk.Dialog):
             'settings.'
         )
         self.message.set_text(message_text)
+        self.status.set_text(_('Enabling Flathub'))
         self.ok_button.set_label(_('Enable Flathub'))
         self.ok_button.connect('clicked', self.fix_disabled)
     
     def fix_missing(self, button):
         """ Add a missing Flathub remote to the user installation. """
+        self.show_all()
 
         # We do this in a thread because we don't know how long it will take 
         # to download the flatpakrepo file or how long it will take to save to
         # the disk. This prevents the GUI from locking up. 
         add_thread = AddThread(self, 'Flathub', FLATPAKREPO_URL)
-        status = _('Adding flathub from {}').format(FLATPAKREPO_URL)
-        self.status.set_text(status)
         self.spinner.start()
         self.set_sensitive(False)
         add_thread.start()
     
     def fix_disabled(self, button):
         """ Enabling a disabled Flathub remote on the user installation."""
-        self.status.set_text(_('Enabling Flathub'))
+        self.show_all()
         self.spinner.start()
         flathub_remote = flatpak.get_flathub_remote()
         user_installation = flatpak.get_user_installation()
