@@ -22,11 +22,14 @@ This file is part of Pop-Transition.
 
 pop-transition - dialog to add Flathub if it is missing.
 """
+from threading import Thread
 
 import gettext
-from gi.repository import Gtk
+from gi.repository import Flatpak, Gio, GLib, Gtk, Pango
+from . import flatpak
 
 _ = gettext.gettext
+FLATPAKREPO_URL = 'https://flathub.org/repo/flathub.flatpakrepo'
 
 class FlathubDialog(Gtk.Dialog):
     """ Dialog to add Flathub if it is missing."""
@@ -43,6 +46,8 @@ class FlathubDialog(Gtk.Dialog):
             use_header_bar=True,
             **kwargs
         )
+
+        self.flathub_remote = None
         
         self.set_position(Gtk.WindowPosition.CENTER_ON_PARENT)
         self.set_transient_for(main_window)
@@ -70,18 +75,21 @@ class FlathubDialog(Gtk.Dialog):
         self.message.set_width_chars(40)
         self.content_grid.attach(self.message, 1, 1, 1, 1)
 
+        self.status = Gtk.Label.new('')
+        self.status.set_line_wrap(True)
+        self.status.set_line_wrap_mode(Pango.WrapMode.WORD_CHAR)
+        self.status.set_width_chars(60)
+        self.content_grid.attach(self.status, 0, 3, 2, 1)
+
+        self.spinner = Gtk.Spinner()
+
         self.ok_button = self.get_widget_for_response(Gtk.ResponseType.OK)
         Gtk.StyleContext.add_class(
             self.ok_button.get_style_context(),
             'suggested-action'
         )
 
-        # Future code here.
-
         self.show_all()
-
-        # Testing code here.
-        self.setup_for_disabled()
 
     def setup_for_missing(self):
         """ Set up the dialog for adding a missing Flathub remote."""
@@ -97,6 +105,7 @@ class FlathubDialog(Gtk.Dialog):
         )
         self.message.set_text(message_text)
         self.ok_button.set_label(_('Add Flathub'))
+        self.ok_button.connect('clicked', self.fix_missing)
 
     def setup_for_disabled(self):
         """ Set up the dialog for adding a disabled Flathub remote."""
@@ -114,3 +123,51 @@ class FlathubDialog(Gtk.Dialog):
         )
         self.message.set_text(message_text)
         self.ok_button.set_label(_('Enable Flathub'))
+        self.ok_button.connect('clicked', self.fix_disabled)
+    
+    def fix_missing(self, button):
+        """ Add a missing Flathub remote to the user installation. """
+
+        # We do this in a thread because we don't know how long it will take 
+        # to download the flatpakrepo file or how long it will take to save to
+        # the disk. This prevents the GUI from locking up. 
+        add_thread = AddThread(self, 'Flathub', FLATPAKREPO_URL)
+        status = _('Adding flathub from {}').format(FLATPAKREPO_URL)
+        self.status.set_text(status)
+        self.spinner.start()
+        self.set_sensitive(False)
+        add_thread.start()
+    
+    def fix_disabled(self, button):
+        """ Enabling a disabled Flathub remote on the user installation."""
+        self.status.set_text(_('Enabling Flathub'))
+        self.spinner.start()
+        flathub_remote = flatpak.get_flathub_remote()
+        user_installation = flatpak.get_user_installation()
+        flathub_remote.set_disabled(False)
+        user_installation.modify_remote(flathub_remote)
+
+
+class AddThread(Thread):
+
+    def __init__(self, dialog, name, url):
+        super().__init__()
+        self.dialog = dialog
+        self.name = name
+        self.url = url
+
+    def run(self):
+        installation = flatpak.get_user_installation()
+        repofile = Gio.File.new_for_uri(self.url)
+        try:
+            a, contents, b = repofile.load_contents()
+            repodata = GLib.Bytes.new(contents)
+            
+            new_remote = Flatpak.Remote.new_from_file(self.name, repodata)
+            installation.add_remote(new_remote, True, None)
+        
+        except GLib.Error as e:
+            contents = None
+        
+        GLib.idle_add(self.dialog.spinner.stop)
+        GLib.idle_add(self.dialog.set_sensitive, True)

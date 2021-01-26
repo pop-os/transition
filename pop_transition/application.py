@@ -37,6 +37,15 @@ from .flathub_dialog import FlathubDialog
 
 _ = gettext.gettext
 
+def get_flathub_disabled():
+    """ Returns whether the Flathub remote is disabled."""
+    flathub_remote = flatpak.get_flathub_remote()
+    if flathub_remote:
+        return flathub_remote.get_disabled()
+    else:
+        return 'no_flathub'
+    
+
 class Application(Gtk.Application):
     """ Application class"""
 
@@ -57,10 +66,17 @@ class Application(Gtk.Application):
                 self.window.app_list.add_package(package)
         self.connect_signals(self.window)
         self.window.show_all()
-        response = self.flathub_dialog.run()
-        self.flathub_dialog.destroy()
+        response = None
+        if get_flathub_disabled() == True:
+            self.flathub_dialog.setup_for_disabled()
+            response = self.flathub_dialog.run()
+        elif get_flathub_disabled() == 'no_flathub':
+            self.flathub_dialog.setup_for_missing()
+            response = self.flathub_dialog.run()
         if response == Gtk.ResponseType.CANCEL:
+            self.flathub_dialog.destroy()
             self.quit()
+        self.flathub_dialog.destroy()
     
     def connect_signals(self, window):
         """ Connect signals to their functionality."""
