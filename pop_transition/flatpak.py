@@ -69,6 +69,11 @@ class InstallThread(Thread):
         self.flathub = get_flathub_remote()
     
     def run(self):
+        print('Updating Appstream Data')
+        # If the appstream data is out of date, it can cause problems installing
+        # some applications. So we update it first.
+        self.user.update_appstream_full_sync(self.flathub.get_name())
+
         print('Installing Flatpaks...')
         
         # We use a transaction to get error details and to install dependencies 
