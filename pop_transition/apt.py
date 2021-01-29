@@ -77,7 +77,8 @@ class RemoveThread(Thread):
             success = privileged_object.remove_packages(pkg_list)
         
         except:
-            print("Countn't remove one or more packages")
+            print("Couldn't remove one or more packages")
+            success = []
         
         # idle_add(self.window.quit_app)
         for package in self.packages:
