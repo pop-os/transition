@@ -133,7 +133,7 @@ class FlathubDialog(Gtk.Dialog):
         message_text = _(
             'Flathub is currently disabled on your system. You will need to '
             'enable it to install updated applications.\n\n'
-            'After installation you can re-disable Flathub from the Pop_Shop '
+            'After installation, you can re-disable Flathub from the Pop!_Shop '
             'settings, although it is recommended to leave it enabled to allow '
             'for future updates.'
         )
