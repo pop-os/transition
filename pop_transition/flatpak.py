@@ -23,6 +23,7 @@ This file is part of Pop-Transition.
 pop-transition - flatpak interface module.
 """
 
+import subprocess
 from threading import Thread
 from gi.repository import Flatpak, GLib
 from gi.repository.GObject import idle_add
@@ -69,12 +70,20 @@ class InstallThread(Thread):
         self.flathub = get_flathub_remote()
     
     def run(self):
+        idle_add(self.packages[0].set_status_text, 'Updating Appstream Data')
+        print("Repairing Flatpak installation")
+        # Sometimes this appears to cause issues, so we need to do a quick 
+        # repair first to ensure that the local installation is consistent.
+        # See https://github.com/flatpak/flatpak/issues/4095
+        subprocess.run(['flatpak', 'repair', '--user'])
+
         print('Updating Appstream Data')
         # If the appstream data is out of date, it can cause problems installing
         # some applications. So we update it first.
         self.user.update_appstream_full_sync(self.flathub.get_name())
 
         print('Installing Flatpaks...')
+        idle_add(self.packages[0].set_status_text, 'Waiting')
         
         # We use a transaction to get error details and to install dependencies 
         transaction = Flatpak.Transaction.new_for_installation(self.user)
