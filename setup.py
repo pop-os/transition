@@ -164,7 +164,7 @@ setup(
         ('/usr/share/applications', ['data/org.pop_os.transition.desktop']),
         ('/usr/share/polkit-1/actions', ['data/org.pop_os.transition.policy']),
         ('/etc/dbus-1/system.d/', ['data/org.pop_os.transition.conf']),
-        ('/usr/lib/pop-transition', ['data/service.py']),
+        ('/usr/lib/pop-transition', ['data/service.py', 'data/flathub-badge.svg']),
         ('/etc/xdg/autostart', ['data/org.pop_os.transition.Notify.desktop'])
     ],
     scripts=['bin/pop-transition']
