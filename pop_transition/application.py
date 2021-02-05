@@ -145,7 +145,7 @@ class Application(Gtk.Application):
         flatpak.install_flatpaks(install_flatpaks, window)
 
         for package in window.app_list.packages:
-            if package.checkbox.get_active:
+            if package.checkbox.get_active():
                 if package.old_config and package.new_config:
                         package.status = 'Migrating configuration'
                         try:
