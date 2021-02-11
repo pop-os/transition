@@ -90,7 +90,7 @@ class Transition(dbus.service.Object):
         sender_keyword='sender', connection_keyword='conn'
     )
     def open_cache(self, sender=None, conn=None):
-        """ Lock the package system. """
+        """ Open the package cache. """
         self._check_polkit_privilege(
             sender, conn, 'org.pop_os.transition_system.removedebs'
         )
@@ -105,7 +105,7 @@ class Transition(dbus.service.Object):
         sender_keyword='sender', connection_keyword='conn'
     )
     def commit_changes(self, sender=None, conn=None):
-        """ Lock the package system. """
+        """ Commit changes to the cache. """
         self._check_polkit_privilege(
             sender, conn, 'org.pop_os.transition_system.removedebs'
         )
@@ -119,7 +119,7 @@ class Transition(dbus.service.Object):
         sender_keyword='sender', connection_keyword='conn'
     )
     def close_cache(self, sender=None, conn=None):
-        """ Lock the package system. """
+        """ Close the package cache. """
         self._check_polkit_privilege(
             sender, conn, 'org.pop_os.transition_system.removedebs'
         )
