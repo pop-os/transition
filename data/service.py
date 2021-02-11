@@ -49,44 +49,6 @@ class Transition(dbus.service.Object):
         self.enforce_polkit = True
         self.cache = Cache()
         self.lock = None
-
-    @dbus.service.method(
-        'org.pop_os.transition_system.Interface', 
-        in_signature='as', out_signature='as',
-        sender_keyword='sender', connection_keyword='conn'
-    )
-    def remove_packages(self, pkg_list, sender=None, conn=None):
-        self._check_polkit_privilege(
-            sender, conn, 'org.pop_os.transition_system.removedebs'
-        )
-
-        # Obtain a package manager lock to tell us if something is currently
-        # using apt and prevent other programs from using it while we're working
-        print('Obtaining lock')
-        try:
-            with apt_pkg.SystemLock():
-                print('Lock obtained')
-                cache = Cache()
-                cache.update()
-                cache.open()
-                removed_pkgs = []
-
-                for package in pkg_list:
-                    try:
-                        pkg = cache[package]
-                        pkg.mark_delete()
-                        removed_pkgs.append(package)
-                    except:
-                        print(f'Could not mark {package} for removal')
-
-                cache.commit()
-                cache.close()
-                return removed_pkgs
-                
-        except apt_pkg.Error:
-            print('Lock failed, trying again in 5 seconds.')
-            time.sleep(5)
-            return []
     
     @dbus.service.method(
         'org.pop_os.transition_system.Interface', 
