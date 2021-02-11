@@ -1,3 +1,9 @@
+pop-transition (1.1.1) groovy; urgency=medium
+
+  * Make sure the dbus service does not operate without a local lock
+
+ -- Ian Santopietro <ian@system76.com>  Thu, 11 Feb 2021 12:58:06 -0700
+
 pop-transition (1.1.0) groovy; urgency=medium
 
   * Re-did apt management for package removal

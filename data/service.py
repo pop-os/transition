@@ -162,6 +162,9 @@ class Transition(dbus.service.Object):
         sender_keyword='sender', connection_keyword='conn'
     )
     def exit(self, sender=None, conn=None):
+        if self.lock:
+            self.close_cache()
+            self.release_lock()
         mainloop.quit()
 
     def _check_polkit_privilege(self, sender, conn, privilege):
