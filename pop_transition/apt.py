@@ -76,25 +76,49 @@ class RemoveThread(Thread):
 
         for package in self.packages:
             pkg_list.append(package.deb_package)
-        # try:
-        #     print(f'Removing debs: {pkg_list}')
-
-        #     # Keep trying to obtain a lock and remove the packages
-        #     while not success:
-        #         print('Obtaining package manager lock and removing packages')
-        #         success = privileged_object.remove_packages(pkg_list)
-        
-        # except:
-        #     print("Couldn't remove one or more packages")
-        #     success = []
+            idle_add(package.set_status_text, 'Waiting')
 
         print(f'Removing debs: {pkg_list}')
 
         # Keep trying to obtain a lock and remove the packages
-        while success == []:
-            print('Obtaining package manager lock and removing packages')
-            success = privileged_object.remove_packages(pkg_list)
+        while True:
+            idle_add(
+                self.packages[0].set_status_text,
+                'Waiting for the package system lock'
+            )
+            lock = privileged_object.obtain_lock()
+            if lock:
+                break
+            print('Could not obtain lock, trying again in 5 seconds')
+            time.sleep(5)
         
+        privileged_object.open_cache()
+        
+        for package in self.packages:
+            idle_add(package.set_status_text, f'Removing {package.deb_package}')
+            removed = privileged_object.remove_package(package.deb_package)
+            if removed:
+                success.append(removed)
+        
+        try:
+            privileged_object.commit_changes()
+        except:
+            success = []
+        privileged_object.close_cache()
+
+        # Don't exit until the lock is released.
+        while True:
+            try:
+                idle_add(
+                    self.packages[0].set_status_text,
+                    'Releasing Package Manager Lock'
+                )
+                unlock = privileged_object.release_lock()
+                if unlock:
+                    break
+            except:
+                continue
+                
         # idle_add(self.window.quit_app)
         for package in self.packages:
             if package.deb_package in success:
