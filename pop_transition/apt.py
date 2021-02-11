@@ -92,23 +92,33 @@ class RemoveThread(Thread):
             print('Could not obtain lock, trying again in 5 seconds')
             time.sleep(5)
         
-        privileged_object.open_cache()
+        # Most of the following code is contained within try-except blocks 
+        # because we need to be 100% sure that we release the package manager
+        # lock at the end of the process, so we cannot allow a failure from the
+        # package system to propagate outwards and prevent release of the lock.
+        # debugging information can be obtained by running the dbus service from 
+        # a root terminal and observing the output. 
+        try:
+            privileged_object.open_cache()
         
-        for package in self.packages:
-            idle_add(package.set_status_text, f'Removing {package.deb_package}')
-            removed = privileged_object.remove_package(package.deb_package)
-            if removed:
-                success.append(removed)
+            for package in self.packages:
+                idle_add(package.set_status_text, f'Removing {package.deb_package}')
+                removed = privileged_object.remove_package(package.deb_package)
+                if removed:
+                    success.append(removed)
+        except:
+            success = []
         
         try:
             privileged_object.commit_changes()
+            privileged_object.close_cache()
         except:
             success = []
-        privileged_object.close_cache()
 
         # Don't exit until the lock is released.
         while True:
             try:
+                print('Releasing package manager lock')
                 idle_add(
                     self.packages[0].set_status_text,
                     'Releasing Package Manager Lock'
@@ -116,7 +126,8 @@ class RemoveThread(Thread):
                 unlock = privileged_object.release_lock()
                 if unlock:
                     break
-            except:
+            except Exception as e:
+                print(e)
                 continue
                 
         # idle_add(self.window.quit_app)
