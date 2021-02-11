@@ -1,3 +1,11 @@
+pop-transition (1.1.0) groovy; urgency=medium
+
+  * Re-did apt management for package removal
+  * Lock is now obtained specifically for removal and maintained until we're done
+  * Fixes #22
+
+ -- Ian Santopietro <ian@system76.com>  Thu, 11 Feb 2021 12:40:01 -0700
+
 pop-transition (1.0.1) eoan; urgency=medium
 
   * Add page transitions between Flatpak and Apt pages.
