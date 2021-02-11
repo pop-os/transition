@@ -65,6 +65,7 @@ class Transition(dbus.service.Object):
             self.lock = apt_pkg.get_lock('/var/lib/dpkg/lock-frontend', True)
             return True
         except apt_pkg.Error:
+            self.lock = None
             return False
     
     @dbus.service.method(
@@ -80,6 +81,7 @@ class Transition(dbus.service.Object):
         print('Releasing package manager lock')
         try:
             os.close(self.lock)
+            self.lock = None
             return True
         except:
             return False
@@ -94,10 +96,12 @@ class Transition(dbus.service.Object):
         self._check_polkit_privilege(
             sender, conn, 'org.pop_os.transition_system.removedebs'
         )
-        print('Opening package cache')
-        self.cache.update()
-        self.cache.open()
-        return True
+        if self.lock:
+            print('Opening package cache')
+            self.cache.update()
+            self.cache.open()
+            return True
+        return False
     
     @dbus.service.method(
         'org.pop_os.transition_system.Interface', 
@@ -109,9 +113,11 @@ class Transition(dbus.service.Object):
         self._check_polkit_privilege(
             sender, conn, 'org.pop_os.transition_system.removedebs'
         )
-        print('Committing changes to cache')
-        self.cache.commit()
-        return True
+        if self.lock:
+            print('Committing changes to cache')
+            self.cache.commit()
+            return True
+        return False
     
     @dbus.service.method(
         'org.pop_os.transition_system.Interface', 
@@ -123,9 +129,11 @@ class Transition(dbus.service.Object):
         self._check_polkit_privilege(
             sender, conn, 'org.pop_os.transition_system.removedebs'
         )
-        print('Closing package cache')
-        self.cache.close()
-        return True
+        if self.lock:
+            print('Closing package cache')
+            self.cache.close()
+            return True
+        return False
 
     @dbus.service.method(
         'org.pop_os.transition_system.Interface', 
@@ -137,14 +145,16 @@ class Transition(dbus.service.Object):
         self._check_polkit_privilege(
             sender, conn, 'org.pop_os.transition_system.removedebs'
         )
-        print(f'Marking {package} for removal')
-        try:
-            pkg = self.cache[package]
-            pkg.mark_delete()
-            return pkg.name
-        except:
-            print(f'Could not mark {package} for removal')
-            return ''
+        if self.lock:
+            print(f'Marking {package} for removal')
+            try:
+                pkg = self.cache[package]
+                pkg.mark_delete()
+                return pkg.name
+            except:
+                print(f'Could not mark {package} for removal')
+                return ''
+        return ''
 
     @dbus.service.method(
         'org.pop_os.transition_system.Interface', 
