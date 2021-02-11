@@ -30,7 +30,8 @@ import sys
 import time
 import os
 
-from apt.cache import Cache
+from apt.cache import Cache, LockFailedException
+import apt_pkg
 from gi.repository import GLib, GObject
 
 class TransitionException(dbus.DBusException):
@@ -46,7 +47,6 @@ class Transition(dbus.service.Object):
         self.dbus_info = None
         self.polkit = None
         self.enforce_polkit = True
-        self.cache = Cache()
 
     @dbus.service.method(
         'org.pop_os.transition_system.Interface', 
@@ -58,30 +58,40 @@ class Transition(dbus.service.Object):
             sender, conn, 'org.pop_os.transition_system.removedebs'
         )
 
-        self.cache.update()
-        self.cache.open()
-        removed_pkgs = []
+        # Obtain a package manager lock to tell us if something is currently
+        # using apt and prevent other programs from using it while we're working
+        print('Obtaining lock')
+        try:
+            with apt_pkg.SystemLock():
+                print('Lock obtained')
+                cache = Cache()
+                cache.update()
+                cache.open()
+                removed_pkgs = []
 
-        for package in pkg_list:
-            try:
-                pkg = self.cache[package]
-                pkg.mark_delete()
-                removed_pkgs.append(package)
-            except:
-                print(f'Could not mark {package} for removal')
+                for package in pkg_list:
+                    try:
+                        pkg = cache[package]
+                        pkg.mark_delete()
+                        removed_pkgs.append(package)
+                    except:
+                        print(f'Could not mark {package} for removal')
 
-        self.cache.commit()
-        self.cache.close()
+                cache.commit()
+                cache.close()
+                return removed_pkgs
+                
+        except apt_pkg.Error:
+            print('Lock failed, trying again in 5 seconds.')
+            time.sleep(5)
+            return []
 
-        return removed_pkgs
-    
     @dbus.service.method(
         'org.pop_os.transition_system.Interface', 
         in_signature='', out_signature='',
         sender_keyword='sender', connection_keyword='conn'
     )
     def exit(self, sender=None, conn=None):
-        self.cache.close()
         mainloop.quit()
 
     def _check_polkit_privilege(self, sender, conn, privilege):

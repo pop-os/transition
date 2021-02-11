@@ -22,10 +22,12 @@ This file is part of Pop-Transition.
 
 pop-transition - APT interface module.
 """
+import time
 
 import dbus
 
 from apt.cache import Cache
+import apt_pkg
 from gi.repository.GObject import idle_add
 from threading import Thread
 
@@ -70,15 +72,28 @@ class RemoveThread(Thread):
     
     def run(self):
         pkg_list = []
+        success = []
+
         for package in self.packages:
             pkg_list.append(package.deb_package)
-        try:
-            print(f'Removing debs: {pkg_list}')
-            success = privileged_object.remove_packages(pkg_list)
+        # try:
+        #     print(f'Removing debs: {pkg_list}')
+
+        #     # Keep trying to obtain a lock and remove the packages
+        #     while not success:
+        #         print('Obtaining package manager lock and removing packages')
+        #         success = privileged_object.remove_packages(pkg_list)
         
-        except:
-            print("Couldn't remove one or more packages")
-            success = []
+        # except:
+        #     print("Couldn't remove one or more packages")
+        #     success = []
+
+        print(f'Removing debs: {pkg_list}')
+
+        # Keep trying to obtain a lock and remove the packages
+        while success == []:
+            print('Obtaining package manager lock and removing packages')
+            success = privileged_object.remove_packages(pkg_list)
         
         # idle_add(self.window.quit_app)
         for package in self.packages:
