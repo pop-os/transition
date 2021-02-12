@@ -49,6 +49,7 @@ class Transition(dbus.service.Object):
         self.enforce_polkit = True
         self.cache = Cache()
         self.lock = None
+        self.apt_lock = None
     
     @dbus.service.method(
         'org.pop_os.transition_system.Interface', 
@@ -63,9 +64,13 @@ class Transition(dbus.service.Object):
         print('Obtaining Package manager lock')
         try:
             self.lock = apt_pkg.get_lock('/var/lib/dpkg/lock-frontend', True)
+            self.apt_lock = apt_pkg.get_lock('/var/lib/apt/lists/lock', True)
+            print('Lock obtained')
             return True
         except apt_pkg.Error:
+            print('Could not obtain lock')
             self.lock = None
+            self.apt_lock = None
             return False
     
     @dbus.service.method(
@@ -81,9 +86,13 @@ class Transition(dbus.service.Object):
         print('Releasing package manager lock')
         try:
             os.close(self.lock)
+            os.close(self.apt_lock)
             self.lock = None
+            self.apt_lock = None
+            print('Lock released')
             return True
         except:
+            print('Could not release lock')
             return False
     
     @dbus.service.method(
@@ -96,11 +105,13 @@ class Transition(dbus.service.Object):
         self._check_polkit_privilege(
             sender, conn, 'org.pop_os.transition_system.removedebs'
         )
-        if self.lock:
+        if self.lock and self.apt_lock:
             print('Opening package cache')
             self.cache.update()
             self.cache.open()
+            print('Cache open')
             return True
+        print('No lock, cannot open cache')
         return False
     
     @dbus.service.method(
@@ -113,10 +124,11 @@ class Transition(dbus.service.Object):
         self._check_polkit_privilege(
             sender, conn, 'org.pop_os.transition_system.removedebs'
         )
-        if self.lock:
-            print('Committing changes to cache')
+        if self.lock and self.apt_lock:
             self.cache.commit()
+            print('Committed changes to cache')
             return True
+        print('No lock, Cannot commit changes')
         return False
     
     @dbus.service.method(
@@ -129,10 +141,11 @@ class Transition(dbus.service.Object):
         self._check_polkit_privilege(
             sender, conn, 'org.pop_os.transition_system.removedebs'
         )
-        if self.lock:
-            print('Closing package cache')
+        if self.lock and self.apt_lock:
             self.cache.close()
+            print('Package cache closed')
             return True
+        print('No lock, cannot close cache')
         return False
 
     @dbus.service.method(
@@ -145,7 +158,7 @@ class Transition(dbus.service.Object):
         self._check_polkit_privilege(
             sender, conn, 'org.pop_os.transition_system.removedebs'
         )
-        if self.lock:
+        if self.lock and self.apt_lock:
             print(f'Marking {package} for removal')
             try:
                 pkg = self.cache[package]
@@ -154,6 +167,7 @@ class Transition(dbus.service.Object):
             except:
                 print(f'Could not mark {package} for removal')
                 return ''
+        print('No lock, cannot mark packages')
         return ''
 
     @dbus.service.method(
@@ -162,7 +176,7 @@ class Transition(dbus.service.Object):
         sender_keyword='sender', connection_keyword='conn'
     )
     def exit(self, sender=None, conn=None):
-        if self.lock:
+        if self.lock and self.apt_lock:
             self.close_cache()
             self.release_lock()
         mainloop.quit()

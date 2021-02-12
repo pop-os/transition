@@ -82,6 +82,7 @@ class RemoveThread(Thread):
 
         # Keep trying to obtain a lock and remove the packages
         while True:
+            print('Waiting for package manager lock')
             idle_add(
                 self.packages[0].set_status_text,
                 'Waiting for the package system lock'
@@ -99,20 +100,26 @@ class RemoveThread(Thread):
         # debugging information can be obtained by running the dbus service from 
         # a root terminal and observing the output. 
         try:
+            print('Opening cache')
             privileged_object.open_cache()
         
             for package in self.packages:
+                print(f'Removing {package.deb_package}')
                 idle_add(package.set_status_text, f'Removing {package.deb_package}')
                 removed = privileged_object.remove_package(package.deb_package)
                 if removed:
+                    print(f'Marked {removed} removed.')
                     success.append(removed)
-        except:
+        except Exception as e:
+            print(f'Something went wrong: {e}')
             success = []
         
         try:
+            print('Committing changes and closing cache')
             privileged_object.commit_changes()
             privileged_object.close_cache()
-        except:
+        except Exception as e:
+            print(f'Something went wrong: {e}')
             success = []
 
         # Don't exit until the lock is released.
