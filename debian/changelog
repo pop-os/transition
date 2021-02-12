@@ -1,3 +1,9 @@
+pop-transition (1.1.2) groovy; urgency=medium
+
+  * Obtain an APT lock as well as a dpkg lock
+
+ -- Ian Santopietro <ian@system76.com>  Fri, 12 Feb 2021 12:00:16 -0700
+
 pop-transition (1.1.1) groovy; urgency=medium
 
   * Make sure the dbus service does not operate without a local lock
