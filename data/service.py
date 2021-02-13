@@ -30,7 +30,8 @@ import sys
 import time
 import os
 
-from apt.cache import Cache
+from apt.cache import Cache, LockFailedException
+import apt_pkg
 from gi.repository import GLib, GObject
 
 class TransitionException(dbus.DBusException):
@@ -47,41 +48,137 @@ class Transition(dbus.service.Object):
         self.polkit = None
         self.enforce_polkit = True
         self.cache = Cache()
-
+        self.lock = None
+        self.apt_lock = None
+    
     @dbus.service.method(
         'org.pop_os.transition_system.Interface', 
-        in_signature='as', out_signature='as',
+        in_signature='', out_signature='b',
         sender_keyword='sender', connection_keyword='conn'
     )
-    def remove_packages(self, pkg_list, sender=None, conn=None):
+    def obtain_lock(self, sender=None, conn=None):
+        """ Lock the package system. """
         self._check_polkit_privilege(
             sender, conn, 'org.pop_os.transition_system.removedebs'
         )
+        print('Obtaining Package manager lock')
+        try:
+            self.lock = apt_pkg.get_lock('/var/lib/dpkg/lock-frontend', True)
+            self.apt_lock = apt_pkg.get_lock('/var/lib/apt/lists/lock', True)
+            print('Lock obtained')
+            return True
+        except apt_pkg.Error:
+            print('Could not obtain lock')
+            self.lock = None
+            self.apt_lock = None
+            return False
+    
+    @dbus.service.method(
+        'org.pop_os.transition_system.Interface', 
+        in_signature='', out_signature='b',
+        sender_keyword='sender', connection_keyword='conn'
+    )
+    def release_lock(self, sender=None, conn=None):
+        """ Unlock the package system. """
+        self._check_polkit_privilege(
+            sender, conn, 'org.pop_os.transition_system.removedebs'
+        )
+        print('Releasing package manager lock')
+        try:
+            os.close(self.lock)
+            os.close(self.apt_lock)
+            self.lock = None
+            self.apt_lock = None
+            print('Lock released')
+            return True
+        except:
+            print('Could not release lock')
+            return False
+    
+    @dbus.service.method(
+        'org.pop_os.transition_system.Interface', 
+        in_signature='', out_signature='b',
+        sender_keyword='sender', connection_keyword='conn'
+    )
+    def open_cache(self, sender=None, conn=None):
+        """ Open the package cache. """
+        self._check_polkit_privilege(
+            sender, conn, 'org.pop_os.transition_system.removedebs'
+        )
+        if self.lock and self.apt_lock:
+            print('Opening package cache')
+            self.cache.update()
+            self.cache.open()
+            print('Cache open')
+            return True
+        print('No lock, cannot open cache')
+        return False
+    
+    @dbus.service.method(
+        'org.pop_os.transition_system.Interface', 
+        in_signature='', out_signature='b',
+        sender_keyword='sender', connection_keyword='conn'
+    )
+    def commit_changes(self, sender=None, conn=None):
+        """ Commit changes to the cache. """
+        self._check_polkit_privilege(
+            sender, conn, 'org.pop_os.transition_system.removedebs'
+        )
+        if self.lock and self.apt_lock:
+            self.cache.commit()
+            print('Committed changes to cache')
+            return True
+        print('No lock, Cannot commit changes')
+        return False
+    
+    @dbus.service.method(
+        'org.pop_os.transition_system.Interface', 
+        in_signature='', out_signature='b',
+        sender_keyword='sender', connection_keyword='conn'
+    )
+    def close_cache(self, sender=None, conn=None):
+        """ Close the package cache. """
+        self._check_polkit_privilege(
+            sender, conn, 'org.pop_os.transition_system.removedebs'
+        )
+        if self.lock and self.apt_lock:
+            self.cache.close()
+            print('Package cache closed')
+            return True
+        print('No lock, cannot close cache')
+        return False
 
-        self.cache.update()
-        self.cache.open()
-        removed_pkgs = []
-
-        for package in pkg_list:
+    @dbus.service.method(
+        'org.pop_os.transition_system.Interface', 
+        in_signature='s', out_signature='s',
+        sender_keyword='sender', connection_keyword='conn'
+    )
+    def remove_package(self, package, sender=None, conn=None):
+        """ Mark a package for removal."""
+        self._check_polkit_privilege(
+            sender, conn, 'org.pop_os.transition_system.removedebs'
+        )
+        if self.lock and self.apt_lock:
+            print(f'Marking {package} for removal')
             try:
                 pkg = self.cache[package]
                 pkg.mark_delete()
-                removed_pkgs.append(package)
+                return pkg.name
             except:
                 print(f'Could not mark {package} for removal')
+                return ''
+        print('No lock, cannot mark packages')
+        return ''
 
-        self.cache.commit()
-        self.cache.close()
-
-        return removed_pkgs
-    
     @dbus.service.method(
         'org.pop_os.transition_system.Interface', 
         in_signature='', out_signature='',
         sender_keyword='sender', connection_keyword='conn'
     )
     def exit(self, sender=None, conn=None):
-        self.cache.close()
+        if self.lock and self.apt_lock:
+            self.close_cache()
+            self.release_lock()
         mainloop.quit()
 
     def _check_polkit_privilege(self, sender, conn, privilege):

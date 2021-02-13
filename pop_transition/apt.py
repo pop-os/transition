@@ -22,10 +22,12 @@ This file is part of Pop-Transition.
 
 pop-transition - APT interface module.
 """
+import time
 
 import dbus
 
 from apt.cache import Cache
+import apt_pkg
 from gi.repository.GObject import idle_add
 from threading import Thread
 
@@ -70,16 +72,71 @@ class RemoveThread(Thread):
     
     def run(self):
         pkg_list = []
+        success = []
+
         for package in self.packages:
             pkg_list.append(package.deb_package)
-        try:
-            print(f'Removing debs: {pkg_list}')
-            success = privileged_object.remove_packages(pkg_list)
+            idle_add(package.set_status_text, 'Waiting')
+
+        print(f'Removing debs: {pkg_list}')
+
+        # Keep trying to obtain a lock and remove the packages
+        while True:
+            print('Waiting for package manager lock')
+            idle_add(
+                self.packages[0].set_status_text,
+                'Waiting for the package system lock'
+            )
+            lock = privileged_object.obtain_lock()
+            if lock:
+                break
+            print('Could not obtain lock, trying again in 5 seconds')
+            time.sleep(5)
         
-        except:
-            print("Couldn't remove one or more packages")
+        # Most of the following code is contained within try-except blocks 
+        # because we need to be 100% sure that we release the package manager
+        # lock at the end of the process, so we cannot allow a failure from the
+        # package system to propagate outwards and prevent release of the lock.
+        # debugging information can be obtained by running the dbus service from 
+        # a root terminal and observing the output. 
+        try:
+            print('Opening cache')
+            privileged_object.open_cache()
+        
+            for package in self.packages:
+                print(f'Removing {package.deb_package}')
+                idle_add(package.set_status_text, f'Removing {package.deb_package}')
+                removed = privileged_object.remove_package(package.deb_package)
+                if removed:
+                    print(f'Marked {removed} removed.')
+                    success.append(removed)
+        except Exception as e:
+            print(f'Something went wrong: {e}')
             success = []
         
+        try:
+            print('Committing changes and closing cache')
+            privileged_object.commit_changes()
+            privileged_object.close_cache()
+        except Exception as e:
+            print(f'Something went wrong: {e}')
+            success = []
+
+        # Don't exit until the lock is released.
+        while True:
+            try:
+                print('Releasing package manager lock')
+                idle_add(
+                    self.packages[0].set_status_text,
+                    'Releasing Package Manager Lock'
+                )
+                unlock = privileged_object.release_lock()
+                if unlock:
+                    break
+            except Exception as e:
+                print(e)
+                continue
+                
         # idle_add(self.window.quit_app)
         for package in self.packages:
             if package.deb_package in success:

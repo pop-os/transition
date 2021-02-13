@@ -120,7 +120,7 @@ class Application(Gtk.Application):
             package.status = f'Checking'
 
             if package.checkbox.get_active():
-                package.status = f'Removing deb {package.deb_package}'
+                package.status = f'Waiting'
                 remove_debs.append(package)
             else:
                 package.spinner.stop()
