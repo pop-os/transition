@@ -212,7 +212,7 @@ class Notification(Application):
             notification = Gio.Notification.new(_('Transition to Flatpak'))
             notification.set_body(
                 _(
-                    'A number of debian packages are no longer recieving updates. '
+                    'A number of debian packages are no longer receiving updates. '
                     'Please transition these applications to Flatpak to continue '
                     'receiving updates.'
                 )
