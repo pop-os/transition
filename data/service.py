@@ -235,6 +235,6 @@ if __name__ == "__main__":
     bus = dbus.SystemBus()
     name = dbus.service.BusName('org.pop_os.transition_system', bus)
     object = Transition(bus, '/PopTransition')
-    mainloop = GObject.MainLoop()
+    mainloop = GLib.MainLoop()
 
     mainloop.run()
