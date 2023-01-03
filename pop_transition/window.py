@@ -142,6 +142,9 @@ class Window(Gtk.ApplicationWindow):
     
     def show_error(self, message_title:str, message_text:str) -> None:
         """Show an error dialog"""
+        self.error = ErrorDialog(self, message_title, message_text)
+        self.error.run()
+        self.error.destroy()
 
     def move_pages(self, button):
         """ Move to the next or previous page."""
