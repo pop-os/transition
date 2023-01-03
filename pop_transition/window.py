@@ -374,10 +374,18 @@ class ErrorDialog(Gtk.Dialog):
         self.content_grid.attach(self.dialog_message, 1, 1, 1, 1)
 
         expander = Gtk.Expander.new('Error details:')
-        traceback_label = Gtk.Label.new('\n'.join(traceback.format_exception(exception)))
-        traceback_label.set_line_wrap(True)
-        expander.add(traceback_label)
         self.content_grid.attach(expander, 0, 3, 2, 1)
+
+        traceback_scroll = Gtk.ScrolledWindow()
+        traceback_scroll.set_vexpand(True)
+        traceback_scroll.set_hexpand(True)
+        traceback_scroll.set_size_request(-1, 200)
+        expander.add(traceback_scroll)
+
+        traceback_label = Gtk.TextView.new()
+        traceback_text = traceback_label.get_buffer()
+        traceback_text.set_text('\n'.join(traceback.format_exception(exception)))
+        traceback_scroll.add(traceback_label)
 
         self.show_all()
     
