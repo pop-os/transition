@@ -25,7 +25,7 @@ pop-transition - Window Module
 
 import gettext
 
-from gi.repository import Gtk
+from gi.repository import Gtk, Gio
 
 from . import dismissal
 from .headerbar import Headerbar
@@ -143,8 +143,39 @@ class Window(Gtk.ApplicationWindow):
     def show_error(self, message_title:str, message_text:str) -> None:
         """Show an error dialog"""
         self.error = ErrorDialog(self, message_title, message_text)
+        self.error.dialog_message.set_markup(
+            self.parse_errors(message_text, self.error)
+        )
         self.error.run()
         self.error.destroy()
+    
+    def parse_errors(self, message:str, dialog:Gtk.Dialog):
+        """Looks through an error message and tries to translate it into a
+        more user-friendly form.
+        
+        Should help provide users with enough info to actually fix a problem.
+        """
+
+        message_translated = message
+
+        message_list = message.split('\n')
+        for line in message_list:
+            if 'does not have a Release file' in line: # discontinued repo
+                line_list = line.split("'")
+                repo: str = line_list[1]
+                message_translated = 'The repository '
+                message_translated += repo
+                message_translated += (
+                    ' appears to no longer be valid, and removal cannot continue. Please '
+                    'remove the repository from the System Software Sources, then '
+                    'try again.'
+                )
+                dialog.add_repos_button()
+                break
+        
+        return message_translated
+                    
+
 
     def move_pages(self, button):
         """ Move to the next or previous page."""
@@ -315,26 +346,48 @@ class ErrorDialog(Gtk.Dialog):
 
         content_area = self.get_content_area()
 
-        content_grid = Gtk.Grid()
-        content_grid.set_margin_top(24)
-        content_grid.set_margin_left(24)
-        content_grid.set_margin_right(24)
-        content_grid.set_margin_bottom(24)
-        content_grid.set_column_spacing(36)
-        content_grid.set_row_spacing(12)
-        content_area.add(content_grid)
+        self.content_grid = Gtk.Grid()
+        self.content_grid.set_margin_top(24)
+        self.content_grid.set_margin_left(24)
+        self.content_grid.set_margin_right(24)
+        self.content_grid.set_margin_bottom(24)
+        self.content_grid.set_column_spacing(36)
+        self.content_grid.set_row_spacing(12)
+        content_area.add(self.content_grid)
 
         error_image = Gtk.Image.new_from_icon_name(
             'warning-symbolic',
             Gtk.IconSize.DIALOG
         )
-        content_grid.attach(error_image, 0, 0, 1, 2)
+        self.content_grid.attach(error_image, 0, 0, 1, 2)
 
         dialog_label = Gtk.Label()
         dialog_label.set_markup(f'<b>{message_title}</b>')
-        content_grid.attach(dialog_label, 1, 0, 1, 1)
+        self.content_grid.attach(dialog_label, 1, 0, 1, 1)
 
-        dialog_message = Gtk.Label.new(message_text)
-        content_grid.attach(dialog_message, 1, 1, 1, 1)
+        self.dialog_message = Gtk.Label.new(message_text)
+        self.dialog_message.set_line_wrap(True)
+        self.dialog_message.set_width_chars(1)
+        self.content_grid.attach(self.dialog_message, 1, 1, 1, 1)
 
         self.show_all()
+    
+    def add_repos_button(self) -> None:
+        repoman_app = None
+        all_apps = Gio.AppInfo.get_all()
+        for app in all_apps:
+            if app.get_name() == 'Repoman':
+                repoman_app = app
+                break
+        print(repoman_app.get_name())
+        if repoman_app:
+            repoman_button = Gtk.Button.new_with_label(
+                _('Open Software Sources')
+            )
+            repoman_button.connect('clicked', self.launch_repoman, repoman_app)
+            print(repoman_button)
+            self.content_grid.attach(repoman_button, 1, 2, 1, 1)
+            repoman_button.show()
+    
+    def launch_repoman(self, button, repoman_app):
+        repoman_app.launch()
