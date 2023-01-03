@@ -24,6 +24,8 @@ pop-transition - flatpak interface module.
 """
 
 import subprocess
+from logging import getLogger
+
 from threading import Thread
 from gi.repository import Flatpak, GLib
 from gi.repository.GObject import idle_add
@@ -64,6 +66,7 @@ class InstallThread(Thread):
 
     def __init__(self, packages, window):
         super().__init__()
+        self.log = getLogger('pop-transition.flatpak')
         self.packages = packages
         self.window = window
         self.user = get_user_installation()
@@ -71,18 +74,18 @@ class InstallThread(Thread):
     
     def run(self):
         idle_add(self.packages[0].set_status_text, 'Updating Appstream Data')
-        print("Repairing Flatpak installation")
+        self.log.info("Repairing Flatpak installation")
         # Sometimes this appears to cause issues, so we need to do a quick 
         # repair first to ensure that the local installation is consistent.
         # See https://github.com/flatpak/flatpak/issues/4095
         subprocess.run(['flatpak', 'repair', '--user'])
 
-        print('Updating Appstream Data')
+        self.log.info('Updating Appstream Data')
         # If the appstream data is out of date, it can cause problems installing
         # some applications. So we update it first.
         self.user.update_appstream_full_sync(self.flathub.get_name())
 
-        print('Installing Flatpaks...')
+        self.log.info('Installing Flatpaks...')
         idle_add(self.packages[0].set_status_text, 'Waiting')
         
         # We use a transaction to get error details and to install dependencies 
@@ -92,7 +95,7 @@ class InstallThread(Thread):
         transaction.connect('operation-error', self.on_operation_error)
 
         for package in self.packages:
-            print(f'Installing {package.name} flatpak {package.app_id}.')
+            self.log.debug(f'Installing {package.name} flatpak {package.app_id}.')
             remote_ref = self.user.fetch_remote_ref_sync(
                 self.flathub.get_name(),
                 Flatpak.RefKind.APP,
@@ -124,11 +127,11 @@ class InstallThread(Thread):
     def get_package_from_operation(self, operation):
         ref = operation.get_ref()
         ref_name = ref.split('/')[1]
-        print(f'Looking for ID from ref {ref}')
+        self.log.debug(f'Looking for ID from ref {ref}')
 
         for package in self.packages:
             if ref_name == package.app_id:
-                print(f'Found ID {ref_name} in package {package.name}')
+                self.log.debug(f'Found ID {ref_name} in package {package.name}')
                 return package
     
     def on_new_operation(self, transaction, operation, progress):
