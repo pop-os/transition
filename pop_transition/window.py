@@ -24,6 +24,7 @@ pop-transition - Window Module
 """
 
 import gettext
+import traceback
 
 from gi.repository import Gtk, Gio
 
@@ -140,9 +141,11 @@ class Window(Gtk.ApplicationWindow):
         }
         pages[page]()
     
-    def show_error(self, message_title:str, message_text:str) -> None:
+    def show_error(self, title:str, exception:Exception) -> None:
         """Show an error dialog"""
-        self.error = ErrorDialog(self, message_title, message_text)
+        self.error = ErrorDialog(self, title, exception)
+        message_text = traceback.format_exception_only(exception)[0].strip()
+        print(message_text)
         self.error.dialog_message.set_markup(
             self.parse_errors(message_text, self.error)
         )
@@ -175,8 +178,6 @@ class Window(Gtk.ApplicationWindow):
         
         return message_translated
                     
-
-
     def move_pages(self, button):
         """ Move to the next or previous page."""
         current_index = self.pages.index(self.current_page)
@@ -335,8 +336,8 @@ class Window(Gtk.ApplicationWindow):
 class ErrorDialog(Gtk.Dialog):
     def __init__(self, 
                  window: Gtk.Window, 
-                 message_title: str, 
-                 message_text: str) -> None:
+                 message_title: str,
+                 exception: Exception) -> None:
 
         super().__init__(use_header_bar=True, modal=1)
         self.set_deletable(False)
@@ -345,6 +346,8 @@ class ErrorDialog(Gtk.Dialog):
         self.add_button(Gtk.STOCK_CLOSE, Gtk.ResponseType.OK)
 
         content_area = self.get_content_area()
+
+        self.set_size_request(650, 100)
 
         self.content_grid = Gtk.Grid()
         self.content_grid.set_margin_top(24)
@@ -356,7 +359,7 @@ class ErrorDialog(Gtk.Dialog):
         content_area.add(self.content_grid)
 
         error_image = Gtk.Image.new_from_icon_name(
-            'warning-symbolic',
+            'dialog-warning-symbolic',
             Gtk.IconSize.DIALOG
         )
         self.content_grid.attach(error_image, 0, 0, 1, 2)
@@ -365,10 +368,16 @@ class ErrorDialog(Gtk.Dialog):
         dialog_label.set_markup(f'<b>{message_title}</b>')
         self.content_grid.attach(dialog_label, 1, 0, 1, 1)
 
-        self.dialog_message = Gtk.Label.new(message_text)
+        self.dialog_message = Gtk.Label.new('message_text')
         self.dialog_message.set_line_wrap(True)
         self.dialog_message.set_width_chars(1)
         self.content_grid.attach(self.dialog_message, 1, 1, 1, 1)
+
+        expander = Gtk.Expander.new('Error details:')
+        traceback_label = Gtk.Label.new('\n'.join(traceback.format_exception(exception)))
+        traceback_label.set_line_wrap(True)
+        expander.add(traceback_label)
+        self.content_grid.attach(expander, 0, 3, 2, 1)
 
         self.show_all()
     

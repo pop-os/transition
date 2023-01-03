@@ -129,12 +129,12 @@ class RemoveThread(Thread):
             self.log.info('Opening cache')
             privileged_object.open_cache()
             self.cache_open = True
-        except Exception as e:
-            self.log.error('Could not open package cache: %s', e)
+        except Exception as exc:
+            self.log.error('Could not open package cache: %s', exc)
             idle_add(
                 self.window.show_error,
                 'Packages could not be removed',
-                str(e)
+                exc
             )
             self.cache_open = False
     
