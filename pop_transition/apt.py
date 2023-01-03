@@ -85,15 +85,31 @@ class RemoveThread(Thread):
         self.log.info(f'Removing debs: {pkg_list}')
 
         # Keep trying to obtain a lock and remove the packages
+        count:int = 0
         while True:
             self.log.info('Waiting for package manager lock')
             idle_add(
                 self.packages[0].set_status_text,
                 'Waiting for the package system lock'
             )
-            lock = privileged_object.obtain_lock()
+            lock, error = self.lock_cache()
+            self.log.debug('Lock: %s; Error: %s', lock, error)
             if lock:
                 break
+            if count >= 2: # Insist on password entry 3 times, then error out
+                self.log.error('Could not open package cache: Permission Denied')
+                idle_add(
+                    self.window.show_error,
+                    'Packages could not be removed',
+                    error
+                )
+                self.cache_open = False
+                idle_add(self.window.show_summary_page)
+                return
+            if error:
+                count += 1
+                time.sleep(.5)
+                continue
             self.log.warning('Could not obtain lock, trying again in 5 seconds')
             time.sleep(5)
         
@@ -103,7 +119,7 @@ class RemoveThread(Thread):
         # package system to propagate outwards and prevent release of the lock.
         # debugging information can be obtained by running the dbus service from 
         # a root terminal and observing the output. 
-        self.open()
+        self.open_cache()
 
         if self.cache_open:
             self.mark()
@@ -123,8 +139,22 @@ class RemoveThread(Thread):
                 idle_add(package.set_removed, True)
         
         idle_add(self.window.show_summary_page)
+    
+    def lock_cache(self) -> tuple:
+        err = None
+        lock = False
+        try:
+            lock:bool = privileged_object.obtain_lock()
+        except dbus.exceptions.DBusException as e:
+            if 'org.pop_os.transition_system.PermissionDeniedByPolicy' in str(e):
+                err = e
+        except Exception as e:
+            pass
 
-    def open(self):
+        return (lock, err)
+
+
+    def open_cache(self):
         try:
             self.log.info('Opening cache')
             privileged_object.open_cache()

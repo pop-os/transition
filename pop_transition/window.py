@@ -175,6 +175,14 @@ class Window(Gtk.ApplicationWindow):
                 )
                 dialog.add_repos_button()
                 break
+            
+            if 'org.pop_os.transition_system.PermissionDeniedByPolicy' in line:
+                message_translated = (
+                    'Administrator privileges are required to remove old Debian '
+                    'packages from the system.'
+                )
+                dialog.expander.hide()
+                break
         
         return message_translated
                     
@@ -373,14 +381,14 @@ class ErrorDialog(Gtk.Dialog):
         self.dialog_message.set_width_chars(1)
         self.content_grid.attach(self.dialog_message, 1, 1, 1, 1)
 
-        expander = Gtk.Expander.new('Error details:')
-        self.content_grid.attach(expander, 0, 3, 2, 1)
+        self.expander = Gtk.Expander.new('Error details:')
+        self.content_grid.attach(self.expander, 0, 3, 2, 1)
 
         traceback_scroll = Gtk.ScrolledWindow()
         traceback_scroll.set_vexpand(True)
         traceback_scroll.set_hexpand(True)
         traceback_scroll.set_size_request(-1, 200)
-        expander.add(traceback_scroll)
+        self.expander.add(traceback_scroll)
 
         traceback_label = Gtk.TextView.new()
         traceback_text = traceback_label.get_buffer()
