@@ -45,10 +45,22 @@ Options:
             transition, a notification will be displayed. The daemon will then 
             exit after 10 seconds.
 """
-    
+import logging
+import sys
+
+formatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
+log = logging.getLogger('pop-transition')
+handler = logging.StreamHandler()
+handler.setFormatter(formatter)
+if 'debug' in sys.argv:
+    handler.setLevel(logging.DEBUG)
+else:
+    handler.setLevel(logging.WARNING)
+log.addHandler(handler)
+log.setLevel(logging.DEBUG)
+log.debug('Set up logging')
 
 import pop_transition
-import sys
 
 if len(sys.argv) < 1:
     pop_transition.run_window()
