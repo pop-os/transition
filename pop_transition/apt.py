@@ -30,7 +30,7 @@ import dbus
 
 from apt.cache import Cache
 import apt_pkg
-from gi.repository.GObject import idle_add
+from gi.repository.GLib import idle_add
 from threading import Thread
 
 CACHE = Cache()
@@ -115,6 +115,11 @@ class RemoveThread(Thread):
                     success.append(removed)
         except Exception as e:
             self.log.error(f'Something went wrong: {e}')
+            idle_add(
+                self.window.show_error,
+                'Packages could not be removed',
+                str(e)
+            )
             success = []
         
         try:
@@ -123,6 +128,11 @@ class RemoveThread(Thread):
             privileged_object.close_cache()
         except Exception as e:
             self.log.error(f'Something went wrong: {e}')
+            idle_add(
+                self.window.show_error,
+                'Packages could not be removed',
+                str(e)
+            )
             success = []
 
         # Don't exit until the lock is released.
