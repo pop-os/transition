@@ -72,10 +72,11 @@ class RemoveThread(Thread):
         self.log = getLogger('pop-transition.apt')
         self.window = window
         self.packages = packages
+        self.success:list = []
+        self.cache_open:bool = False
     
     def run(self):
         pkg_list = []
-        success = []
 
         for package in self.packages:
             pkg_list.append(package.deb_package)
@@ -102,40 +103,85 @@ class RemoveThread(Thread):
         # package system to propagate outwards and prevent release of the lock.
         # debugging information can be obtained by running the dbus service from 
         # a root terminal and observing the output. 
+        self.open()
+
+        if self.cache_open:
+            self.mark()
+        
+        if self.cache_open and self.success:
+            self.commit()
+        
+        if self.cache_open:
+            self.close()
+
+        # Don't exit until the lock is released.
+        self.release()
+                
+        # idle_add(self.window.quit_app)
+        for package in self.packages:
+            if package.deb_package in self.success:
+                idle_add(package.set_removed, True)
+        
+        idle_add(self.window.show_summary_page)
+
+    def open(self):
         try:
             self.log.info('Opening cache')
             privileged_object.open_cache()
-        
+            self.cache_open = True
+        except Exception as e:
+            self.log.error('Could not open package cache: %s', e)
+            idle_add(
+                self.window.show_error,
+                'Packages could not be removed',
+                str(e)
+            )
+            self.cache_open = False
+    
+    def mark(self):
+        try:
             for package in self.packages:
                 self.log.info(f'Removing {package.deb_package}')
                 idle_add(package.set_status_text, f'Removing {package.deb_package}')
                 removed = privileged_object.remove_package(package.deb_package)
                 if removed:
                     self.log.info(f'Marked {removed} removed.')
-                    success.append(removed)
+                    self.success.append(removed)
         except Exception as e:
-            self.log.error(f'Something went wrong: {e}')
+            self.log.error('Could not mark packages for removal: %s', e)
             idle_add(
                 self.window.show_error,
                 'Packages could not be removed',
                 str(e)
             )
-            success = []
-        
+            self.success = []
+    
+    def commit(self):
+        self.log.info('Committing changes to the package system')
         try:
-            self.log.info('Committing changes and closing cache')
             privileged_object.commit_changes()
-            privileged_object.close_cache()
         except Exception as e:
-            self.log.error(f'Something went wrong: {e}')
+            self.log.error('Could not commit changes!')
             idle_add(
                 self.window.show_error,
                 'Packages could not be removed',
                 str(e)
             )
-            success = []
+            self.success = []
 
-        # Don't exit until the lock is released.
+    def close(self):
+        try:
+            privileged_object.close_cache()
+            self.cache_open = False
+        except Exception as e:
+            self.log.error('Could not close the package cache')
+            idle_add(
+                self.window.show_error,
+                'Package system error',
+                str(e)
+            )
+
+    def release(self):
         while True:
             try:
                 self.log.info('Releasing package manager lock')
@@ -149,11 +195,4 @@ class RemoveThread(Thread):
             except Exception as e:
                 self.log.warning(e)
                 continue
-                
-        # idle_add(self.window.quit_app)
-        for package in self.packages:
-            if package.deb_package in success:
-                idle_add(package.set_removed, True)
-        
-        idle_add(self.window.show_summary_page)
 
