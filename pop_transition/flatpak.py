@@ -28,7 +28,7 @@ from logging import getLogger
 
 from threading import Thread
 from gi.repository import Flatpak, GLib
-from gi.repository.GObject import idle_add
+from gi.repository.GLib import idle_add
 from repoman import flatpak_helper
 
 def get_flathub_remote():
@@ -78,12 +78,32 @@ class InstallThread(Thread):
         # Sometimes this appears to cause issues, so we need to do a quick 
         # repair first to ensure that the local installation is consistent.
         # See https://github.com/flatpak/flatpak/issues/4095
-        subprocess.run(['flatpak', 'repair', '--user'])
+        try:
+            subprocess.run(['flatpak', 'repair', '--user'])
+        except Exception as err:
+            idle_add(self.window.show_summary_page)
+            idle_add(
+                self.window.show_error,
+                'Could not verify Flatpak installation',
+                err,
+                None
+            )
+            return
 
         self.log.info('Updating Appstream Data')
         # If the appstream data is out of date, it can cause problems installing
         # some applications. So we update it first.
-        self.user.update_appstream_full_sync(self.flathub.get_name())
+        try:
+            self.user.update_appstream_full_sync(self.flathub.get_name())
+        except Exception as err:
+            idle_add(self.window.show_summary_page)
+            idle_add(
+                self.window.show_error,
+                'Could not update Appstream Information',
+                err,
+                None
+            )
+            return
 
         self.log.info('Installing Flatpaks...')
         idle_add(self.packages[0].set_status_text, 'Waiting')
@@ -96,13 +116,23 @@ class InstallThread(Thread):
 
         for package in self.packages:
             self.log.debug(f'Installing {package.name} flatpak {package.app_id}.')
-            remote_ref = self.user.fetch_remote_ref_sync(
-                self.flathub.get_name(),
-                Flatpak.RefKind.APP,
-                package.app_id,
-                None,
-                'stable'
-            )
+            try:
+                remote_ref = self.user.fetch_remote_ref_sync(
+                    self.flathub.get_name(),
+                    Flatpak.RefKind.APP,
+                    package.app_id,
+                    None,
+                    'stable'
+                )
+            except Exception as err:
+                self.log.error('Could not install flatpak: %s', err)
+                idle_add(
+                    self.window.show_error,
+                    'Packages could not be installed',
+                    err,
+                    package
+                )
+                idle_add(self.window.show_summary_page)
             try:
                 transaction.add_install(
                     self.flathub.get_name(), remote_ref.format_ref()
@@ -120,8 +150,19 @@ class InstallThread(Thread):
                 else:
                     idle_add(package.set_status_text, 'Error installing')
                     idle_add(package.set_installed_status, err.message)
-                
-        transaction.run()
+        
+        try:
+            transaction.run()
+        except Exception as err:
+            self.log.error('Could not install flatpak: %s', err)
+            idle_add(
+                self.window.show_error,
+                'Packages could not be installed',
+                err,
+                package
+            )
+            idle_add(self.window.show_summary_page)
+
         idle_add(self.window.show_apt_page)
     
     def get_package_from_operation(self, operation):

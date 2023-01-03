@@ -141,18 +141,22 @@ class Window(Gtk.ApplicationWindow):
         }
         pages[page]()
     
-    def show_error(self, title:str, exception:Exception) -> None:
+    def show_error(self, title:str, exception:Exception, package=None) -> None:
         """Show an error dialog"""
         self.error = ErrorDialog(self, title, exception)
         message_text = traceback.format_exception_only(exception)[0].strip()
-        print(message_text)
-        self.error.dialog_message.set_markup(
-            self.parse_errors(message_text, self.error)
+        message_text, app_quit = self.parse_errors(
+            message_text, 
+            self.error, 
+            package=package
         )
+        self.error.dialog_message.set_markup(message_text)
         self.error.run()
         self.error.destroy()
+        if app_quit:
+            self.quit_app()
     
-    def parse_errors(self, message:str, dialog:Gtk.Dialog):
+    def parse_errors(self, message:str, dialog:Gtk.Dialog, package):
         """Looks through an error message and tries to translate it into a
         more user-friendly form.
         
@@ -160,6 +164,7 @@ class Window(Gtk.ApplicationWindow):
         """
 
         message_translated = message
+        app_quit:bool = False
 
         message_list = message.split('\n')
         for line in message_list:
@@ -174,6 +179,7 @@ class Window(Gtk.ApplicationWindow):
                     'try again.'
                 )
                 dialog.add_repos_button()
+                app_quit = True
                 break
             
             if 'org.pop_os.transition_system.PermissionDeniedByPolicy' in line:
@@ -183,8 +189,50 @@ class Window(Gtk.ApplicationWindow):
                 )
                 dialog.expander.hide()
                 break
+            
+            if 'Error updating appstream2: No such ref' in line:
+                message_translated = (
+                    'Could not update Appstream Information from Flathub. Make '
+                    'sure you\'re connected to the internet and try again.'
+                )
+                app_quit = True
+                break
+            
+            if 'doesn\'t exist in remote' in line:
+                message_translated = 'The app'
+                if package:
+                    message_translated += f' {package.name} ({package.app_id})'
+                message_translated += (
+                    ' doesn\'t appear to exist in Flathub. Make sure you\'re '
+                    'connected to the internet, and if you still have issues, '
+                    'contact Support.'
+                )
+                break
+
+            if 'Temporary failure in name resolution' in line:
+                message_translated = 'The app'
+                if package:
+                    message_translated += f' {package.name} ({package.app_id})'
+                message_translated += 'Could not be downloaded.\n\n'
+                message_translated += (
+                    'Make sure you\'re connected to the internet and try again. '
+                    'If you continue to have issue, Flathub may be '
+                    'temporarily offline; try again later.\n\nIf the issue '
+                    'persists, contact support.'
+                )
+                break
+            
+            if 'Aborted due to failure' in line:
+                message_translated = 'The app'
+                if package:
+                    message_translated += f' {package.name} ({package.app_id})'
+                message_translated += (
+                    'Could not be installed due to an unexpected error. Please '
+                    'try again; if the issue persists, contact support.'
+                )
+                break
         
-        return message_translated
+        return message_translated, app_quit
                     
     def move_pages(self, button):
         """ Move to the next or previous page."""

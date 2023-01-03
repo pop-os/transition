@@ -101,7 +101,8 @@ class RemoveThread(Thread):
                 idle_add(
                     self.window.show_error,
                     'Packages could not be removed',
-                    error
+                    error,
+                    None
                 )
                 self.cache_open = False
                 idle_add(self.window.show_summary_page)
@@ -164,7 +165,8 @@ class RemoveThread(Thread):
             idle_add(
                 self.window.show_error,
                 'Packages could not be removed',
-                exc
+                exc,
+                None
             )
             self.cache_open = False
     
@@ -182,7 +184,8 @@ class RemoveThread(Thread):
             idle_add(
                 self.window.show_error,
                 'Packages could not be removed',
-                str(e)
+                e,
+                None
             )
             self.success = []
     
@@ -195,7 +198,8 @@ class RemoveThread(Thread):
             idle_add(
                 self.window.show_error,
                 'Packages could not be removed',
-                str(e)
+                e,
+                None
             )
             self.success = []
 
@@ -208,7 +212,8 @@ class RemoveThread(Thread):
             idle_add(
                 self.window.show_error,
                 'Package system error',
-                str(e)
+                e,
+                None
             )
 
     def release(self):
