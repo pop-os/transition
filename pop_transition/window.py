@@ -452,13 +452,11 @@ class ErrorDialog(Gtk.Dialog):
             if app.get_name() == 'Repoman':
                 repoman_app = app
                 break
-        print(repoman_app.get_name())
         if repoman_app:
             repoman_button = Gtk.Button.new_with_label(
                 _('Open Software Sources')
             )
             repoman_button.connect('clicked', self.launch_repoman, repoman_app)
-            print(repoman_button)
             self.content_grid.attach(repoman_button, 1, 2, 1, 1)
             repoman_button.show()
     
