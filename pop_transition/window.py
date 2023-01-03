@@ -140,6 +140,9 @@ class Window(Gtk.ApplicationWindow):
         }
         pages[page]()
     
+    def show_error(self, message_title:str, message_text:str) -> None:
+        """Show an error dialog"""
+
     def move_pages(self, button):
         """ Move to the next or previous page."""
         current_index = self.pages.index(self.current_page)
@@ -294,3 +297,41 @@ class Window(Gtk.ApplicationWindow):
         self.set_buttons_sensitive(True)
         self._current_page = 'summary'
         self.set_visible_buttons()
+
+class ErrorDialog(Gtk.Dialog):
+    def __init__(self, 
+                 window: Gtk.Window, 
+                 message_title: str, 
+                 message_text: str) -> None:
+
+        super().__init__(use_header_bar=True, modal=1)
+        self.set_deletable(False)
+        self.set_transient_for(window)
+
+        self.add_button(Gtk.STOCK_CLOSE, Gtk.ResponseType.OK)
+
+        content_area = self.get_content_area()
+
+        content_grid = Gtk.Grid()
+        content_grid.set_margin_top(24)
+        content_grid.set_margin_left(24)
+        content_grid.set_margin_right(24)
+        content_grid.set_margin_bottom(24)
+        content_grid.set_column_spacing(36)
+        content_grid.set_row_spacing(12)
+        content_area.add(content_grid)
+
+        error_image = Gtk.Image.new_from_icon_name(
+            'warning-symbolic',
+            Gtk.IconSize.DIALOG
+        )
+        content_grid.attach(error_image, 0, 0, 1, 2)
+
+        dialog_label = Gtk.Label()
+        dialog_label.set_markup(f'<b>{message_title}</b>')
+        content_grid.attach(dialog_label, 1, 0, 1, 1)
+
+        dialog_message = Gtk.Label.new(message_text)
+        content_grid.attach(dialog_message, 1, 1, 1, 1)
+
+        self.show_all()
