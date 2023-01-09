@@ -24,8 +24,9 @@ pop-transition - Window Module
 """
 
 import gettext
+import traceback
 
-from gi.repository import Gtk
+from gi.repository import Gtk, Gio
 
 from . import dismissal
 from .headerbar import Headerbar
@@ -140,6 +141,99 @@ class Window(Gtk.ApplicationWindow):
         }
         pages[page]()
     
+    def show_error(self, title:str, exception:Exception, package=None) -> None:
+        """Show an error dialog"""
+        self.error = ErrorDialog(self, title, exception)
+        message_text = traceback.format_exception_only(exception)[0].strip()
+        message_text, app_quit = self.parse_errors(
+            message_text, 
+            self.error, 
+            package=package
+        )
+        self.error.dialog_message.set_markup(message_text)
+        self.error.run()
+        self.error.destroy()
+        if app_quit:
+            self.quit_app()
+    
+    def parse_errors(self, message:str, dialog:Gtk.Dialog, package):
+        """Looks through an error message and tries to translate it into a
+        more user-friendly form.
+        
+        Should help provide users with enough info to actually fix a problem.
+        """
+
+        message_translated = message
+        app_quit:bool = False
+
+        message_list = message.split('\n')
+        for line in message_list:
+            if 'does not have a Release file' in line: # discontinued repo
+                line_list = line.split("'")
+                repo: str = line_list[1]
+                message_translated = 'The repository '
+                message_translated += repo
+                message_translated += (
+                    ' appears to no longer be valid, and removal cannot continue. Please '
+                    'remove the repository from the System Software Sources, then '
+                    'try again.'
+                )
+                dialog.add_repos_button()
+                app_quit = True
+                break
+            
+            if 'org.pop_os.transition_system.PermissionDeniedByPolicy' in line:
+                message_translated = (
+                    'Administrator privileges are required to remove old Debian '
+                    'packages from the system.'
+                )
+                dialog.expander.hide()
+                break
+            
+            if 'Error updating appstream2: No such ref' in line:
+                message_translated = (
+                    'Could not update Appstream Information from Flathub. Make '
+                    'sure you\'re connected to the internet and try again.'
+                )
+                app_quit = True
+                break
+            
+            if 'doesn\'t exist in remote' in line:
+                message_translated = 'The app'
+                if package:
+                    message_translated += f' {package.name} ({package.app_id})'
+                message_translated += (
+                    ' doesn\'t appear to exist in Flathub. Make sure you\'re '
+                    'connected to the internet, and if you still have issues, '
+                    'contact Support.'
+                )
+                break
+
+            if 'Temporary failure in name resolution' in line:
+                message_translated = 'The app'
+                if package:
+                    message_translated += f' {package.name} ({package.app_id})'
+                message_translated += 'Could not be downloaded.\n\n'
+                message_translated += (
+                    'Make sure you\'re connected to the internet and try again. '
+                    'If you continue to have issue, Flathub may be '
+                    'temporarily offline; try again later.\n\nIf the issue '
+                    'persists, contact support.'
+                )
+                break
+            
+            if 'Aborted due to failure' in line:
+                message_translated = 'The app'
+                if package:
+                    message_translated += f' {package.name} ({package.app_id})'
+                message_translated += (
+                    'Could not be installed due to an unexpected error. Please '
+                    'try again; if the issue persists, contact support.'
+                )
+                break
+        
+        return message_translated, app_quit
+                    
     def move_pages(self, button):
         """ Move to the next or previous page."""
         current_index = self.pages.index(self.current_page)
@@ -294,3 +388,77 @@ class Window(Gtk.ApplicationWindow):
         self.set_buttons_sensitive(True)
         self._current_page = 'summary'
         self.set_visible_buttons()
+
+class ErrorDialog(Gtk.Dialog):
+    def __init__(self, 
+                 window: Gtk.Window, 
+                 message_title: str,
+                 exception: Exception) -> None:
+
+        super().__init__(use_header_bar=True, modal=1)
+        self.set_deletable(False)
+        self.set_transient_for(window)
+
+        self.add_button(Gtk.STOCK_CLOSE, Gtk.ResponseType.OK)
+
+        content_area = self.get_content_area()
+
+        self.set_size_request(650, 100)
+
+        self.content_grid = Gtk.Grid()
+        self.content_grid.set_margin_top(24)
+        self.content_grid.set_margin_left(24)
+        self.content_grid.set_margin_right(24)
+        self.content_grid.set_margin_bottom(24)
+        self.content_grid.set_column_spacing(36)
+        self.content_grid.set_row_spacing(12)
+        content_area.add(self.content_grid)
+
+        error_image = Gtk.Image.new_from_icon_name(
+            'dialog-warning-symbolic',
+            Gtk.IconSize.DIALOG
+        )
+        self.content_grid.attach(error_image, 0, 0, 1, 2)
+
+        dialog_label = Gtk.Label()
+        dialog_label.set_markup(f'<b>{message_title}</b>')
+        self.content_grid.attach(dialog_label, 1, 0, 1, 1)
+
+        self.dialog_message = Gtk.Label.new('message_text')
+        self.dialog_message.set_line_wrap(True)
+        self.dialog_message.set_width_chars(1)
+        self.content_grid.attach(self.dialog_message, 1, 1, 1, 1)
+
+        self.expander = Gtk.Expander.new('Error details:')
+        self.content_grid.attach(self.expander, 0, 3, 2, 1)
+
+        traceback_scroll = Gtk.ScrolledWindow()
+        traceback_scroll.set_vexpand(True)
+        traceback_scroll.set_hexpand(True)
+        traceback_scroll.set_size_request(-1, 200)
+        self.expander.add(traceback_scroll)
+
+        traceback_label = Gtk.TextView.new()
+        traceback_text = traceback_label.get_buffer()
+        traceback_text.set_text('\n'.join(traceback.format_exception(exception)))
+        traceback_scroll.add(traceback_label)
+
+        self.show_all()
+    
+    def add_repos_button(self) -> None:
+        repoman_app = None
+        all_apps = Gio.AppInfo.get_all()
+        for app in all_apps:
+            if app.get_name() == 'Repoman':
+                repoman_app = app
+                break
+        if repoman_app:
+            repoman_button = Gtk.Button.new_with_label(
+                _('Open Software Sources')
+            )
+            repoman_button.connect('clicked', self.launch_repoman, repoman_app)
+            self.content_grid.attach(repoman_button, 1, 2, 1, 1)
+            repoman_button.show()
+    
+    def launch_repoman(self, button, repoman_app):
+        repoman_app.launch()

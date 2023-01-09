@@ -22,13 +22,15 @@ This file is part of Pop-Transition.
 
 pop-transition - APT interface module.
 """
+
+from logging import getLogger
 import time
 
 import dbus
 
 from apt.cache import Cache
 import apt_pkg
-from gi.repository.GObject import idle_add
+from gi.repository.GLib import idle_add
 from threading import Thread
 
 CACHE = Cache()
@@ -67,30 +69,49 @@ def remove_debs(remove_debs, window):
 class RemoveThread(Thread):
     def __init__(self, packages, window):
         super().__init__()
+        self.log = getLogger('pop-transition.apt')
         self.window = window
         self.packages = packages
+        self.success:list = []
+        self.cache_open:bool = False
     
     def run(self):
         pkg_list = []
-        success = []
 
         for package in self.packages:
             pkg_list.append(package.deb_package)
             idle_add(package.set_status_text, 'Waiting')
 
-        print(f'Removing debs: {pkg_list}')
+        self.log.info(f'Removing debs: {pkg_list}')
 
         # Keep trying to obtain a lock and remove the packages
+        count:int = 0
         while True:
-            print('Waiting for package manager lock')
+            self.log.info('Waiting for package manager lock')
             idle_add(
                 self.packages[0].set_status_text,
                 'Waiting for the package system lock'
             )
-            lock = privileged_object.obtain_lock()
+            lock, error = self.lock_cache()
+            self.log.debug('Lock: %s; Error: %s', lock, error)
             if lock:
                 break
-            print('Could not obtain lock, trying again in 5 seconds')
+            if count >= 2: # Insist on password entry 3 times, then error out
+                self.log.error('Could not open package cache: Permission Denied')
+                idle_add(
+                    self.window.show_error,
+                    'Packages could not be removed',
+                    error,
+                    None
+                )
+                self.cache_open = False
+                idle_add(self.window.show_summary_page)
+                return
+            if error:
+                count += 1
+                time.sleep(.5)
+                continue
+            self.log.warning('Could not obtain lock, trying again in 5 seconds')
             time.sleep(5)
         
         # Most of the following code is contained within try-except blocks 
@@ -99,33 +120,106 @@ class RemoveThread(Thread):
         # package system to propagate outwards and prevent release of the lock.
         # debugging information can be obtained by running the dbus service from 
         # a root terminal and observing the output. 
-        try:
-            print('Opening cache')
-            privileged_object.open_cache()
+        self.open_cache()
+
+        if self.cache_open:
+            self.mark()
         
+        if self.cache_open and self.success:
+            self.commit()
+        
+        if self.cache_open:
+            self.close()
+
+        # Don't exit until the lock is released.
+        self.release()
+                
+        # idle_add(self.window.quit_app)
+        for package in self.packages:
+            if package.deb_package in self.success:
+                idle_add(package.set_removed, True)
+        
+        idle_add(self.window.show_summary_page)
+    
+    def lock_cache(self) -> tuple:
+        err = None
+        lock = False
+        try:
+            lock:bool = privileged_object.obtain_lock()
+        except dbus.exceptions.DBusException as e:
+            if 'org.pop_os.transition_system.PermissionDeniedByPolicy' in str(e):
+                err = e
+        except Exception as e:
+            pass
+
+        return (lock, err)
+
+
+    def open_cache(self):
+        try:
+            self.log.info('Opening cache')
+            privileged_object.open_cache()
+            self.cache_open = True
+        except Exception as exc:
+            self.log.error('Could not open package cache: %s', exc)
+            idle_add(
+                self.window.show_error,
+                'Packages could not be removed',
+                exc,
+                None
+            )
+            self.cache_open = False
+    
+    def mark(self):
+        try:
             for package in self.packages:
-                print(f'Removing {package.deb_package}')
+                self.log.info(f'Removing {package.deb_package}')
                 idle_add(package.set_status_text, f'Removing {package.deb_package}')
                 removed = privileged_object.remove_package(package.deb_package)
                 if removed:
-                    print(f'Marked {removed} removed.')
-                    success.append(removed)
+                    self.log.info(f'Marked {removed} removed.')
+                    self.success.append(removed)
         except Exception as e:
-            print(f'Something went wrong: {e}')
-            success = []
-        
+            self.log.error('Could not mark packages for removal: %s', e)
+            idle_add(
+                self.window.show_error,
+                'Packages could not be removed',
+                e,
+                None
+            )
+            self.success = []
+    
+    def commit(self):
+        self.log.info('Committing changes to the package system')
         try:
-            print('Committing changes and closing cache')
             privileged_object.commit_changes()
-            privileged_object.close_cache()
         except Exception as e:
-            print(f'Something went wrong: {e}')
-            success = []
+            self.log.error('Could not commit changes!')
+            idle_add(
+                self.window.show_error,
+                'Packages could not be removed',
+                e,
+                None
+            )
+            self.success = []
 
-        # Don't exit until the lock is released.
+    def close(self):
+        try:
+            privileged_object.close_cache()
+            self.cache_open = False
+        except Exception as e:
+            self.log.error('Could not close the package cache')
+            idle_add(
+                self.window.show_error,
+                'Package system error',
+                e,
+                None
+            )
+
+    def release(self):
         while True:
             try:
-                print('Releasing package manager lock')
+                self.log.info('Releasing package manager lock')
                 idle_add(
                     self.packages[0].set_status_text,
                     'Releasing Package Manager Lock'
@@ -134,13 +228,6 @@ class RemoveThread(Thread):
                 if unlock:
                     break
             except Exception as e:
-                print(e)
+                self.log.warning(e)
                 continue
-                
-        # idle_add(self.window.quit_app)
-        for package in self.packages:
-            if package.deb_package in success:
-                idle_add(package.set_removed, True)
-        
-        idle_add(self.window.show_summary_page)
 

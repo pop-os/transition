@@ -25,6 +25,7 @@ pop-transition - Main Application
 
 import gettext
 import shutil
+from logging import getLogger
 
 from gi.repository import Gtk, Gio
 
@@ -53,12 +54,14 @@ class Application(Gtk.Application):
         self.app_list = app_list
         super().__init__(application_id='org.pop_os.transition',
                          flags=Gio.ApplicationFlags.REPLACE)
+        
+        self.log = getLogger('pop-transition.app')
     
     def do_activate(self):
         self.show_window()
     
     def show_window(self, action=None, data=None):
-        print('showing window')
+        self.log.info('showing window')
         self.withdraw_notification('transition-ready')
         self.window = Window(self)
         self.flathub_dialog = FlathubDialog(self.window)
@@ -111,7 +114,7 @@ class Application(Gtk.Application):
 
     
     def on_remove_clicked(self, button, window, data=None):
-        print('Remove Clicked')
+        self.log.info('Remove Clicked')
         window.set_buttons_sensitive(False)
         remove_debs = []
 
@@ -129,7 +132,7 @@ class Application(Gtk.Application):
         apt.remove_debs(remove_debs, window)
     
     def on_install_clicked(self, button, window, data=None):
-        print('Install clicked')
+        self.log.info('Install clicked')
         window.set_buttons_sensitive(False)
         install_flatpaks = []
         
@@ -153,11 +156,11 @@ class Application(Gtk.Application):
                         except shutil.Error:
                             msg = f'Could not copy config for {package.name} '
                             msg += f'from {package.old_config} to {package.new_config}.'
-                            print(msg)
+                            self.log.info(msg)
                         except FileExistsError:
                             msg = f'Config for {package.name} already exists in '
                             msg += f'{package.new_config}.'
-                            print(msg)
+                            self.log.error(msg)
     
     def get_installed_packages(self):
         """ Yield a list of installed Packages."""
@@ -208,7 +211,7 @@ class Notification(Application):
             pkgs.append(pkg)
         
         if len(pkgs) > 0:
-            print('Showing notification')
+            self.log.info('Showing notification')
             notification = Gio.Notification.new(_('Transition to Flatpak'))
             notification.set_body(
                 _(
@@ -220,7 +223,7 @@ class Notification(Application):
             icon = Gio.ThemedIcon.new('system-software-update')
             notification.set_icon(icon)
             notification.set_default_action('app.show-window')
-            print(notification)
+            self.log.error(notification)
             self.send_notification('transition-ready', notification)
         else:
             self.quit()
